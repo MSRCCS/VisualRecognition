@@ -84,12 +84,14 @@ docs/dev
 # CMake generated files
 *.gen.cmake
 *.suo
+*.opensdf
 caffe/caffe.v12.suo
 caffe/3rdparty
 x64/
 bin/
 obj/
 ipch/
+packages/
 */bin/
 */obj/
 */ipch/

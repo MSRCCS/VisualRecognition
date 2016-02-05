@@ -1,0 +1,1945 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        "FaceSdkManagedWrapper"
+    </assembly>
+    <members>
+        <member name="T:FaceSdk.FaceTrackingLocalBinaryFeature">
+            <summary>
+Real-time face tracking
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceTracking.Track(FaceSdk.Image,FaceSdk.Rectangle)">
+            <summary>
+Analyses face and outputs face landmarks within in a rectangular search area.
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceTracking.Track(FaceSdk.Image)">
+            <summary>
+Analyses face and outputs face landmarks.
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceTracking.DetectionInterval">
+            <summary>
+Frame interval that algorithm re-detect face using detector
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceTracking.Smoothness">
+            <summary>
+Tracking result smoothness factor in the number of frames, 0 for automatic smoothing.
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceTracking.FaceLandmarkCount">
+            <summary>
+Total number of landmark points supported by this landmark type
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceTracking.FaceLandmarkType">
+            <summary>
+Returns the landmark type supported by current face alignment class.
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceTracking">
+            <summary>
+Real-time face tracking
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceAttributeGenderImpl">
+            <summary>
+Analyze face and returns gender estimation result
+</summary>
+        </member>
+        <member name="T:facesdk.FaceAttributeGender">
+            <summary>
+Gender attribute analyzer
+</summary>
+        </member>
+        <member name="F:facesdk.FaceGenderResult.Confidence">
+            <summary>Gender estimation confidence (0..1.0f)</summary>
+        </member>
+        <member name="F:facesdk.FaceGenderResult.Gender">
+            <summary>Gender analyzed.</summary>
+        </member>
+        <member name="T:facesdk.FaceGenderResult">
+            <summary>
+FaceAttributeGender output
+</summary>
+        </member>
+        <member name="T:facesdk.FaceGender">
+            <summary>
+Gender types
+</summary>
+        </member>
+        <member name="F:Genderless">
+            <summary>
+Reserved for non-human faces.
+</summary>
+        </member>
+        <member name="F:GenderMale">
+            <summary>
+Indicating a male's face
+</summary>
+        </member>
+        <member name="F:GenderFemale">
+            <summary>
+Indicating a female's face
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceAttributeGender.AnalyzeGender(FaceSdk.Image,FaceSdk.FaceLandmarks)">
+            <summary>Gets gender attribute analyzed.</summary>
+            <param name="faceImage">Input image.</param>
+            <param name="faceLandmarks">Input landmarks.</param>
+            <return>FaceGenderResult containing gender and confidence.</return>
+        </member>
+        <member name="M:FaceSdk.FaceAttributeGender.Analyze(FaceSdk.Image,FaceSdk.FaceLandmarks)">
+            <summary>Gets gender attribute analyzed.</summary>
+            <param name="faceImage">Input image.</param>
+            <param name="faceLandmarks">Input landmarks.</param>
+            <return>Object that represent analyzed results.</return>
+        </member>
+        <member name="M:FaceSdk.FaceAttributeGender.Dispose">
+            <summary>Destructor</summary>
+        </member>
+        <member name="M:FaceSdk.FaceAttributeGender.#ctor(FaceSdk.Model)">
+            <summary>Constructor</summary>
+            <param name="model">Gender analyzer model data</param>
+        </member>
+        <member name="T:FaceSdk.FaceAttributeGender">
+            <summary>
+Analyze face and returns gender estimation result.
+</summary>
+        </member>
+        <member name="F:FaceSdk.FaceGenderResult.Confidence">
+            <summary>Gender estimation confidence (0..1.0f)</summary>
+        </member>
+        <member name="F:FaceSdk.FaceGenderResult.Gender">
+            <summary>Gender analyzed.</summary>
+        </member>
+        <member name="T:FaceSdk.FaceGenderResult">
+            <summary>
+FaceAttributeGender output
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceGender">
+            <summary>
+Gender types
+</summary>
+        </member>
+        <member name="F:FaceSdk.FaceGender.Genderless">
+            <summary>
+Reserved for non-human faces.
+</summary>
+        </member>
+        <member name="F:FaceSdk.FaceGender.Female">
+            <summary>
+Indicating a female's face
+</summary>
+        </member>
+        <member name="F:FaceSdk.FaceGender.Male">
+            <summary>
+Indicating a male's face
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceRecognitionCnnImpl">
+            <summary>
+Convolutional Neural Network managed wrapper calling to native CNN wrapper
+</summary>
+        </member>
+        <member name="M:facesdk.FaceRecognitionCNN.GetFaceFeatureDistance(System.Int32!System.Runtime.CompilerServices.IsConst,System.Void*!System.Runtime.CompilerServices.IsConst,System.Void*!System.Runtime.CompilerServices.IsConst,System.Single*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+            <summary>
+Compute the distance between two face features. The shorter distance the more similar two faces are.
+</summary>
+            <param name="size">face feature vector size in bytes.</param>
+            <param name="face1">face feature 1.</param>
+            <param name="face2">face feature 2.</param>
+            <param name="distance">Output distance value in range of [0..1.0f].</param>
+            <returns>
+ S_OK if succeeded;<br />
+ E_INVALIDARG if face1 or face2 is NULL;<br />
+ E_FACESDK_UNINITIALIZED for class is not initialized.<br />
+ E_FAIL for other errors.
+</returns>
+        </member>
+        <member name="M:facesdk.FaceRecognitionCNN.ExtractFaceFeature(facesdk.Image!System.Runtime.CompilerServices.IsConst,System.Int32!System.Runtime.CompilerServices.IsConst,System.Single!System.Runtime.CompilerServices.IsConst*,System.Int32!System.Runtime.CompilerServices.IsConst,System.Void*)">
+            <summary>
+Extract a face's FaceFeature from input image.
+</summary>
+            <param name="faceImage">Input image contain the face to extract face feature.</param>
+            <param name="landmarkCount">Number of face landmarks, e.g. 27-point FaceLandmarks the count is 27.</param>
+            <param name="landmarks">Face landmark coordinates packed as a float array (x1, y1, x2, y2 ... xn, yn) for 
+locating face components in input image</param>
+            <param name="featureSizeInBytes">User-provided FaceFeature vector size in bytes.</param>
+            <param name="faceFeature">User-provided FaceFeature for output.</param>
+            <returns>
+The output FaceFeature object contains the face information for recognition functions.
+ S_OK if succeeded;<br />
+ E_INVALIDARG for bad image parameters, landmarks null or size miss-match and faceFeature.<br />
+ E_FACESDK_UNINITIALIZED if class is not initialized.<br />
+ E_OUTOFMEMORY if failing to allocate memory;<br />
+ E_FAIL for other errors.
+</returns>
+        </member>
+        <member name="M:facesdk.FaceRecognitionCNN.GetFaceRecognitionThresholds">
+            <summary>
+Algorithm-specific distance threshold to distinguish two face features
+</summary>
+        </member>
+        <member name="M:facesdk.FaceRecognitionCNN.GetFaceLandmarkType">
+            <summary>
+The landmark type supported by this class.
+</summary>
+        </member>
+        <member name="M:facesdk.FaceRecognitionCNN.GetFaceFeatureSize">
+            <summary>
+Get face feature vector size in bytes. It comes from model file, only after Initialize() call 
+it returns a valid value.
+</summary>
+            <returns>Byte size of face feature vector. Returns -1 if recognition class is uninitialized.</returns>
+        </member>
+        <member name="M:facesdk.FaceRecognitionCNN.Initialize(System.UInt64!System.Runtime.CompilerServices.IsConst,System.Void*!System.Runtime.CompilerServices.IsConst)">
+            <summary>
+Initialize recognition class.
+</summary>
+            <param name="modelSize">Model size in bytes.</param>
+            <param name="model">Recognition model data. The pointer must be 16-bytes aligned</param>
+            <returns>
+ S_OK if succeeded;<br />
+ E_INVALIDARG for wrong parameters.<br />
+ E_FACESDK_INVALID_MODEL specifically for wrong model data, non-16bytes-aligned model buffer<br />
+ E_OUTOFMEMORY for internal memory allocation failure;<br />
+ E_FAIL for other errors.
+</returns>
+            <remarks>
+Model buffer must be 16-byte aligned and caller should keep model data during class life cycle.
+</remarks>
+        </member>
+        <member name="T:facesdk.FaceRecognitionCNN">
+            <summary>
+Wrapper class for Convolutional Neural Network face recognition.
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceRecognitionCNN">
+            <summary>
+FaceRecognition class using Convolutional Neural Network
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceDetectionJdaImpl.FaceSizeRecommendation">
+            <summary>
+Algorihtm-recommended detectable face range considering both performance and accuracy
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceDetectionJdaImpl.FaceSizeLimits">
+            <summary>
+Algorithm/model restricted detectable face size range.
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceDetectionJdaImpl">
+            <summary>
+rectangle.
+</summary>
+        </member>
+        <member name="M:facesdk.FaceDetectionJDA.DetectAndAlign(facesdk.Image!System.Runtime.CompilerServices.IsConst*,System.Int32!System.Runtime.CompilerServices.IsConst,System.Int32!System.Runtime.CompilerServices.IsConst,facesdk.Rectangle!System.Runtime.CompilerServices.IsConst*,System.Int32!System.Runtime.CompilerServices.IsConst,facesdk.Rectangle*,System.Int32!System.Runtime.CompilerServices.IsConst,System.Single*,System.Int32*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,System.Int32*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+            <summary>
+Detects faces in an image and returns face rectangle and face landmarks for each face.
+</summary>
+            <param name="image">Input image.</param>
+            <param name="minDetectableFaceSize">The minimal detectable face size in pixels. It should be no smaller than algorithm's MinDetectableFaceSize</param>
+            <param name="maxDetectableFaceSize">The maximal detectable face size in pixels. It should be no larger than algorithm's MaxDetectableFaceSize</param>
+            <param name="searchArea">Pointer to a rectangle area to limit searching is within this area. NULL to indicate no such area and search in the whole image.</param>
+            <param name="outputMaxFaces">Output FaceRect buffer size in elements</param>
+            <param name="outputFaceRects">Output detected face rectangles</param>
+            <param name="faceLandmarkCount">Number of landmarks for a face supported by JDA</param>
+            <param name="outputFaceLandmarks">float buffer to store landmark coordinates</param>
+            <param name="detectedFaceCount">Number of faces actually detected.</param>
+            <param name="outputFaceCount">Number of faces actually written to output FaceRect buffer. It is no larger than detectedFaceCount.</param>
+            <returns>
+S_OK if succeeded;<br />
+E_INVALIDARG wrong parameters e.g. grayImage is NULL, wrong width, height, stride or faceRects is NULL.<br />
+E_FACESDK_UNINITIALIZED if this class is not initialized by calling Initialize().<br />
+E_FAIL for other errors.
+</returns>
+        </member>
+        <member name="M:facesdk.FaceDetectionJDA.GetFaceLandmarkType">
+            <summary>
+The landmark type supported by JDA model.
+</summary>
+        </member>
+        <member name="M:facesdk.FaceDetectionJDA.GetFaceLandmarkCount">
+            <summary>
+Get count of number of face landmarks supported by a JDA model file. Count unit is a (x,y) coordinate pair.
+e.g. if 
+</summary>
+            <returns>-1 for class uninitialized.</returns>
+        </member>
+        <member name="M:facesdk.FaceDetectionJDA.Initialize(System.UInt64!System.Runtime.CompilerServices.IsConst,System.Void*!System.Runtime.CompilerServices.IsConst,facesdk.DetectionMode!System.Runtime.CompilerServices.IsConst,System.Boolean,System.Int32!System.Runtime.CompilerServices.IsConst)">
+            <summary>
+Initialize JDA detector
+</summary>
+        </member>
+        <member name="T:facesdk.FaceDetectionJDA">
+            <summary>
+JDA detector class (joint face detection and alignment) detects face rectangles and also returns face landmarks.
+</summary>
+        </member>
+        <member name="T:facesdk.DetectionMode">
+            <summary>
+Modes for detector behavior
+</summary>
+        </member>
+        <member name="F:DetectionModePreferPrecisionRecall">
+            <summary>
+Searches faces slowly in image with higher precision and recall.
+</summary>
+        </member>
+        <member name="F:DetectionModePreferSpeed">
+            <summary>
+Searches faces quickly in image with expected precision and recall drop.
+</summary>
+        </member>
+        <member name="F:DetectionModeDefault">
+            <summary>
+Algorithm default and balance accuracy and speed.
+</summary>
+        </member>
+        <member name="M:facesdk.FaceDetection.Detect(facesdk.Image!System.Runtime.CompilerServices.IsConst*,System.Int32!System.Runtime.CompilerServices.IsConst,System.Int32!System.Runtime.CompilerServices.IsConst,facesdk.Rectangle!System.Runtime.CompilerServices.IsConst*,System.Int32!System.Runtime.CompilerServices.IsConst,facesdk.Rectangle*,System.Int32*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,System.Int32*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+            <summary>
+Detects faces in an image and outputs FaceRect array, with overriding default min/max detectable face sizes.
+</summary>
+            <param name="image">Input image.</param>
+            <param name="minDetectableFaceSize">Minimal detectable face size in pixels. It should be no smaller than algorithm's restriction</param>
+            <param name="maxDetectableFaceSize">Maximal detectable face size in pixels. It should be no larger than algorithm's restriction</param>
+            <param name="searchArea">A rectangle area to search faces in this area only. NULL to search in the whole image.</param>
+            <param name="outputMaxFaces">Output FaceRect buffer size in elements</param>
+            <param name="outputFaceRects">Output detected face rectangles</param>
+            <param name="detectedFaceCount">Number of faces actually detected.</param>
+            <param name="outputFaceCount">Number of faces actually written to output FaceRect buffer.</param>
+            <returns>
+S_OK if succeeded;<br />
+E_INVALIDARG wrong parameters e.g. grayImage is NULL, wrong width, height, stride or faceRects is NULL.<br />
+E_FACESDK_UNINITIALIZED if this class is not initialized by calling Initialize().<br />
+E_FAIL for other errors.
+</returns>
+        </member>
+        <member name="M:facesdk.FaceDetection.Detect(facesdk.Image!System.Runtime.CompilerServices.IsConst*,facesdk.Rectangle!System.Runtime.CompilerServices.IsConst*,System.Int32!System.Runtime.CompilerServices.IsConst,facesdk.Rectangle*,System.Int32*!System.Runtime.CompilerServices.IsImplicitlyDereferenced,System.Int32*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+            <summary>
+Detects faces in an image and outputs FaceRect array with algorithm default min/max face sizes.
+</summary>
+            <param name="image">Input image.</param>
+            <param name="searchArea">A rectangle area to search faces in this area only. NULL to search in the whole image.</param>
+            <param name="outputMaxFaces">Output FaceRect buffer size in elements</param>
+            <param name="outputFaceRects">Output detected face rectangles</param>
+            <param name="detectedFaceCount">Number of faces actually detected.</param>
+            <param name="outputFaceCount">Number of faces actually written to output FaceRect buffer.</param>
+            <returns>
+S_OK if succeeded;<br />
+E_INVALIDARG wrong parameters e.g. bad image.<br />
+E_FACESDK_UNINITIALIZED if the class is not initialized.<br />
+E_FAIL for other errors.
+</returns>
+            <remarks>
+outputFaceRects contains outputFaceCount number of valid FaceRects
+</remarks>
+        </member>
+        <member name="M:facesdk.FaceDetection.Initialize(System.UInt64!System.Runtime.CompilerServices.IsConst,System.Void*!System.Runtime.CompilerServices.IsConst)">
+            <summary>
+Initialize detector by reading a model data in memory. Caller should keep model data fixed in memory 
+in detector's life-cycle.
+</summary>
+            <param name="modelSize">Model data size in bytes.</param>
+            <param name="model">Pointer to model data buffer. The pointer must be 16-bytes aligned</param>
+            <returns>
+S_OK if succeeded.<br />
+E_INVALIDARG for wrong parameters.<br />
+E_FACESDK_INVALID_MODEL Wrong, misaligned model data.<br />
+E_OUTOFMEMORY for internal memory allocation failure.<br />
+E_FAIL for other errors.
+</returns>
+        </member>
+        <member name="M:facesdk.FaceDetection.GetFaceSizeRecommendation">
+            <summary>
+Returns algorihtm-recommended detectable face range considering both performance and accuracy
+</summary>
+        </member>
+        <member name="M:facesdk.FaceDetection.GetFaceSizeLimits">
+            <summary>
+Returns algorithm/model restricted detectable face size range.
+</summary>
+        </member>
+        <member name="M:facesdk.FaceDetection.Release">
+            <summary>
+Release all internal buffers.
+</summary>
+        </member>
+        <member name="T:facesdk.FaceDetection">
+            <summary>
+Face detection base class.
+</summary>
+        </member>
+        <member name="T:facesdk.FaceSizeRange">
+            <summary>
+A range of detectable face sizes. e.g. MinSize is 24 (pixels) and MaxSize is 960 (pixels) means detectable '
+faces are within size range of [24x24, 960x960].
+Face size definition varies from algorithm to algorihtm. e.g. JDA (Joint-Detection-Alignment) covers the 
+major facial features (eyebrows, eyes, nose, mouth) but excluding hair, ears, and chin.
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceDetectionJDA.DetectAndAlign(FaceSdk.Image,System.Int32,System.Int32,FaceSdk.Rectangle)">
+            <summary>
+Detects faces in an image within the range of specific minimal and maximal detectable sizes, and within
+a search area.
+</summary>
+            <param name="image">image to detect faces</param>
+            <param name="minDetectableFaceSize">the minimal face size to detect.</param>
+            <param name="maxDetectableFaceSize">the minimal face size to detect</param>
+            <param name="searchArea">An rectangular area to detect faces in it</param>
+            <returns>
+FaceRectLandmarks array for detected faces, covering face area. FaceRectLandmarks are sorted with 
+descended order of face rect area sizes.
+</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when image fields are invalid.</exception>
+            <exception cref="T:System.OutOfMemoryException">Throw when internal memory allocation failure.</exception>
+            <exception cref="T:System.Exception">Throw when other failures.</exception>
+            <remarks>
+Face sizes out of [minDetectableFaceSize, maxDetectableFaceSize] range will be ignored.
+Faces that out of search areas will be ignored.
+Faces will not be detected if size beyonds algorithm's limitation specified in property FaceSizeLimits.
+Current algorithm works well for near frontal faces. Faces with very large pose, profile faces, large
+occluded areas may not be detected.
+</remarks>
+        </member>
+        <member name="M:FaceSdk.FaceDetectionJDA.DetectAndAlign(FaceSdk.Image,System.Int32,System.Int32)">
+            <summary>
+Detects faces in an image within the range of specific minimal and maximal detectable sizes, and within
+a search area.
+</summary>
+            <param name="image">image to detect faces</param>
+            <param name="minDetectableFaceSize">the minimal face size to detect.</param>
+            <param name="maxDetectableFaceSize">the minimal face size to detect</param>
+            <returns>
+FaceRectLandmarks array for detected faces, covering face area. FaceRectLandmarks are sorted with 
+descended order of face rect area sizes.
+</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when image fields are invalid.</exception>
+            <exception cref="T:System.OutOfMemoryException">Throw when internal memory allocation failure.</exception>
+            <exception cref="T:System.Exception">Throw when other failures.</exception>
+            <remarks>
+Face sizes out of [minDetectableFaceSize, maxDetectableFaceSize] range will be ignored.
+Faces will not be detected if size beyonds algorithm's limitation specified in property FaceSizeLimits.
+Current algorithm works well for near frontal faces. Faces with very large pose, profile faces, large
+occluded areas may not be detected.
+</remarks>
+        </member>
+        <member name="M:FaceSdk.FaceDetectionJDA.DetectAndAlign(FaceSdk.Image,FaceSdk.Rectangle)">
+            <summary>
+Detects faces in an image within the range of specific minimal and maximal detectable sizes, and within
+a search area.
+</summary>
+            <param name="image">image to detect faces</param>
+            <param name="searchArea">An rectangular area to detect faces in it</param>
+            <returns>
+FaceRectLandmarks array for detected faces, covering face area. FaceRectLandmarks are sorted with 
+descended order of face rect area sizes.
+</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when image fields are invalid.</exception>
+            <exception cref="T:System.OutOfMemoryException">Throw when internal memory allocation failure.</exception>
+            <exception cref="T:System.Exception">Throw when other failures.</exception>
+            <remarks>
+Faces that out of search areas will be ignored.
+Faces will not be detected if size beyonds algorithm's limitation specified in property FaceSizeLimits.
+Current algorithm works well for near frontal faces. Faces with very large pose, profile faces, large
+occluded areas may not be detected.
+</remarks>
+        </member>
+        <member name="M:FaceSdk.FaceDetectionJDA.DetectAndAlign(FaceSdk.Image)">
+            <summary>
+Detects faces in an image within the range of specific minimal and maximal detectable sizes, and within
+a search area.
+</summary>
+            <param name="image">image to detect faces</param>
+            <returns>
+FaceRectLandmarks array for detected faces, covering face area. FaceRectLandmarks are sorted with 
+descended order of face rect area sizes.
+</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when image fields are invalid.</exception>
+            <exception cref="T:System.OutOfMemoryException">Throw when internal memory allocation failure.</exception>
+            <exception cref="T:System.Exception">Throw when other failures.</exception>
+            <remarks>
+Faces will not be detected if size beyonds algorithm's limitation specified in property FaceSizeLimits.
+Current algorithm works well for near frontal faces. Faces with very large pose, profile faces, large
+occluded areas may not be detected.
+</remarks>
+        </member>
+        <member name="P:FaceSdk.FaceDetectionJDA.FaceLandmarkType">
+            <summary>
+Gets the landmark type supported by JDA algorithm/model.
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceDetectionJDA.Detect(FaceSdk.Image,System.Int32,System.Int32,FaceSdk.Rectangle)">
+            <summary>
+Detects faces in an image within the range of specific minimal and maximal detectable sizes, and within
+a search area.
+</summary>
+            <param name="image">image to detect faces</param>
+            <param name="minDetectableFaceSize">the minimal face size to detect.</param>
+            <param name="maxDetectableFaceSize">the minimal face size to detect</param>
+            <param name="searchArea">An rectangular area to detect faces in it</param>
+            <returns>
+FaceRect array for detected faces, covering face area. The FaceRects are sorted with descended order of 
+area sizes.
+</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when image fields are invalid.</exception>
+            <exception cref="T:System.OutOfMemoryException">Throw when internal memory allocation failure.</exception>
+            <exception cref="T:System.Exception">Throw when other failures.</exception>
+            <remarks>
+Face sizes out of [minDetectableFaceSize, maxDetectableFaceSize] range will be ignored.
+Faces that out of search areas will be ignored.
+Faces will not be detected if size beyonds algorithm's limitation specified in property FaceSizeLimits.
+Current algorithm works well for near frontal faces. Faces with very large pose, profile faces, large
+occluded areas may not be detected.
+</remarks>
+        </member>
+        <member name="M:FaceSdk.FaceDetectionJDA.Detect(FaceSdk.Image,System.Int32,System.Int32)">
+            <summary>
+Detects faces in an image within the range of specific minimal and maximal detectable sizes
+</summary>
+            <param name="image">image to detect faces</param>
+            <param name="minDetectableFaceSize">the minimal face size to detect.</param>
+            <param name="maxDetectableFaceSize">the minimal face size to detect</param>
+            <returns>
+FaceRect array for detected faces, covering face area. The FaceRects are sorted with descended order of 
+area sizes.
+</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when image fields are invalid.</exception>
+            <exception cref="T:System.OutOfMemoryException">Throw when internal memory allocation failure.</exception>
+            <exception cref="T:System.Exception">Throw when other failures.</exception>
+            <remarks>
+Face sizes out of [minDetectableFaceSize, maxDetectableFaceSize] range will be ignored.
+Faces will not be detected if size beyonds algorithm's limitation specified in property FaceSizeLimits.
+Current algorithm works well for near frontal faces. Faces with very large pose, profile faces, large
+occluded areas may not be detected.
+</remarks>
+        </member>
+        <member name="M:FaceSdk.FaceDetectionJDA.Detect(FaceSdk.Image,FaceSdk.Rectangle)">
+            <summary>
+Detects faces within an rectangular area in image.
+</summary>
+            <param name="image">image to detect faces</param>
+            <param name="searchArea">An rectangular area to detect faces in it</param>
+            <returns>
+FaceRect array for detected faces, covering face area. The FaceRects are sorted with descended order of 
+area sizes.
+</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when image fields are invalid.</exception>
+            <exception cref="T:System.OutOfMemoryException">Throw when internal memory allocation failure.</exception>
+            <exception cref="T:System.Exception">Throw when other failures.</exception>
+            <remarks>
+Faces will not be detected if size beyonds algorithm's limitation specified in property FaceSizeLimits.
+Current algorithm works well for near frontal faces. Faces with very large pose, profile faces, large
+occluded areas may not be detected.
+</remarks>
+        </member>
+        <member name="M:FaceSdk.FaceDetectionJDA.Detect(FaceSdk.Image)">
+            <summary>
+Detects human faces in an image.
+</summary>
+            <param name="image">image to detect faces</param>
+            <returns>
+FaceRect array for detected faces, covering face area. The FaceRects are sorted with descended order of 
+area sizes.
+</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when image fields are invalid.</exception>
+            <exception cref="T:System.OutOfMemoryException">Throw when internal memory allocation failure.</exception>
+            <exception cref="T:System.Exception">Throw when other failures.</exception>
+            <remarks>
+Faces will not be detected if size beyonds algorithm's limitation specified in property FaceSizeLimits.
+Current algorithm works well for near frontal faces. Faces with very large pose, profile faces, large
+occluded areas may not be detected.
+</remarks>
+        </member>
+        <member name="P:FaceSdk.FaceDetectionJDA.FaceSizeRecommendation">
+            <summary>
+Gets recommended detectable face size range considering both performance and accuracy.
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceDetectionJDA.FaceSizeLimits">
+            <summary>
+Gets detector class detectable face size range.
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceDetectionJDA.Dispose">
+            <summary>
+Destructor
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceDetectionJDA.#ctor(FaceSdk.Model,System.Int32)">
+            <summary>
+Initializes JDA (Joint-detection-alignment) face detection class.
+</summary>
+            <param name="model">detection model data</param>
+            <param name="threads">Number of threads running detection</param>
+            <remarks>
+For multi-core CPU, multi-threaded detection can improve detection speed.
+</remarks>
+        </member>
+        <member name="M:FaceSdk.FaceDetectionJDA.#ctor(FaceSdk.Model)">
+            <summary>
+Initializes JDA (Joint-detection-alignment) face detection class.
+</summary>
+            <param name="model">detection model data</param>
+        </member>
+        <member name="T:FaceSdk.FaceDetectionJDA">
+            <summary>
+FaceJointDetectionAlignment detects human faces and facial landmarks from a bitmap with good 
+precision/recall under memory constraints. By calling to Detect() it returns a list of detected faces 
+with face rectangles and facial landmark points.
+If caller has a pre-tagged face rectangle, it can be leveraged in Detect() by only detect faces around give
+rectangle.
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceRectLandmarks">
+            <summary>
+JDA detection result including face rect and face landmarks.
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceDetection.Detect(FaceSdk.Image,System.Int32,System.Int32,FaceSdk.Rectangle)">
+            <summary>
+Detects faces in an image within the range of specific minimal and maximal detectable sizes, and within
+a search area.
+</summary>
+            <param name="image">image to detect faces</param>
+            <param name="minDetectableFaceSize">the minimal face size to detect.</param>
+            <param name="maxDetectableFaceSize">the minimal face size to detect</param>
+            <param name="searchArea">An rectangular area to detect faces in it</param>
+            <returns>
+FaceRect array for detected faces, covering face area. The FaceRects are sorted with descended order of 
+area sizes.
+</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when image fields are invalid.</exception>
+            <exception cref="T:System.OutOfMemoryException">Throw when internal memory allocation failure.</exception>
+            <exception cref="T:System.Exception">Throw when other failures.</exception>
+            <remarks>
+Face sizes out of [minDetectableFaceSize, maxDetectableFaceSize] range will be ignored.
+Faces that out of search areas will be ignored.
+Faces will not be detected if size beyonds algorithm's limitation specified in property FaceSizeLimits.
+Current algorithm works well for near frontal faces. Faces with very large pose, profile faces, large
+occluded areas may not be detected.
+</remarks>
+        </member>
+        <member name="M:FaceSdk.FaceDetection.Detect(FaceSdk.Image,System.Int32,System.Int32)">
+            <summary>
+Detects faces in an image within the range of specific minimal and maximal detectable sizes
+</summary>
+            <param name="image">image to detect faces</param>
+            <param name="minDetectableFaceSize">the minimal face size to detect.</param>
+            <param name="maxDetectableFaceSize">the minimal face size to detect</param>
+            <returns>
+FaceRect array for detected faces, covering face area. The FaceRects are sorted with descended order of 
+area sizes.
+</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when image fields are invalid.</exception>
+            <exception cref="T:System.OutOfMemoryException">Throw when internal memory allocation failure.</exception>
+            <exception cref="T:System.Exception">Throw when other failures.</exception>
+            <remarks>
+Face sizes out of [minDetectableFaceSize, maxDetectableFaceSize] range will be ignored.
+Faces will not be detected if size beyonds algorithm's limitation specified in property FaceSizeLimits.
+Current algorithm works well for near frontal faces. Faces with very large pose, profile faces, large
+occluded areas may not be detected.
+</remarks>
+        </member>
+        <member name="M:FaceSdk.FaceDetection.Detect(FaceSdk.Image,FaceSdk.Rectangle)">
+            <summary>
+Detects faces within an rectangular area in image.
+</summary>
+            <param name="image">image to detect faces</param>
+            <param name="searchArea">An rectangular area to detect faces in it</param>
+            <returns>
+FaceRect array for detected faces, covering face area. The FaceRects are sorted with descended order of 
+area sizes.
+</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when image fields are invalid.</exception>
+            <exception cref="T:System.OutOfMemoryException">Throw when internal memory allocation failure.</exception>
+            <exception cref="T:System.Exception">Throw when other failures.</exception>
+            <remarks>
+Faces will not be detected if size beyonds algorithm's limitation specified in property FaceSizeLimits.
+Current algorithm works well for near frontal faces. Faces with very large pose, profile faces, large
+occluded areas may not be detected.
+</remarks>
+        </member>
+        <member name="M:FaceSdk.FaceDetection.Detect(FaceSdk.Image)">
+            <summary>
+Detects human faces in an image.
+</summary>
+            <param name="image">image to detect faces</param>
+            <returns>
+FaceRect array for detected faces, covering face area. The FaceRects are sorted with descended order of 
+area sizes.
+</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when image fields are invalid.</exception>
+            <exception cref="T:System.OutOfMemoryException">Throw when internal memory allocation failure.</exception>
+            <exception cref="T:System.Exception">Throw when other failures.</exception>
+            <remarks>
+Faces will not be detected if size beyonds algorithm's limitation specified in property FaceSizeLimits.
+Current algorithm works well for near frontal faces. Faces with very large pose, profile faces, large
+occluded areas may not be detected.
+</remarks>
+        </member>
+        <member name="P:FaceSdk.FaceDetection.FaceSizeRecommendation">
+            <summary>
+Gets recommended detectable face size range considering both performance and accuracy.
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceDetection.FaceSizeLimits">
+            <summary>
+Gets detector class detectable face size range.
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceDetection">
+            <summary>
+Face detection class that wrappers multiple types of face detectors
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceSizeRange">
+            <summary>
+A range of detectable face sizes. e.g. MinFaceSize is 24 and MaxFaceSize is 1024 means
+detectable faces are within [24x24, 1024x1024] in pixels.
+</summary>
+        </member>
+        <member name="M:FaceSdk.ImageUtility.SaveImageToFile(FaceSdk.Image,System.String)">
+            <summary>
+Save Image object to image file
+</summary>
+            <summary>
+Save Image object to image file, and it is useful for debugging.
+Only JPG JPEG BMP and PNG are supported.
+</summary>
+        </member>
+        <member name="M:FaceSdk.ImageUtility.ImageToBitmap(FaceSdk.Image)">
+            <summary>
+Convert Image structure values to Bitmap object.
+</summary>
+            <summary>
+Convert Image structure values to Bitmap object::
+</summary>
+        </member>
+        <member name="M:FaceSdk.ImageUtility.ResizeBitmap(System.Drawing.Bitmap,System.Int32,System.Int32)">
+            <summary>
+Resize a bitmap to target width and height
+</summary>
+        </member>
+        <member name="M:FaceSdk.ImageUtility.CropBitmap(System.Drawing.Bitmap,System.Drawing.Rectangle)">
+            <summary>
+Crop bitmap selected area into a new bitmap
+</summary>
+        </member>
+        <member name="M:FaceSdk.ImageUtility.LoadImageFromBitmapAsGray(System.Drawing.Bitmap)">
+            <summary>
+Convert System::Drawing::Bitmap to decoded grayscale bitmap
+</summary>
+        </member>
+        <member name="M:FaceSdk.ImageUtility.LoadImageFromFileAsGray(System.String)">
+            <summary>
+Convert System::Drawing::Bitmap to converted gray scale image
+</summary>
+        </member>
+        <member name="M:FaceSdk.ImageUtility.LoadImageFromBitmapAsRgb24(System.Drawing.Bitmap)">
+            <summary>
+Convert System::Drawing::Bitmap to decoded image
+</summary>
+        </member>
+        <member name="M:FaceSdk.ImageUtility.LoadImageFromFileAsRgb24(System.String)">
+            <summary>
+Convert image file into decoded image structure.
+</summary>
+        </member>
+        <member name="M:FaceSdk.ImageUtility.ConvertImageRgb24ToGray(FaceSdk.Image)">
+            <summary>
+Convert FaceSdk::Image RGB24 pixels into gray8 pixels
+</summary>
+        </member>
+        <member name="M:FaceSdk.ImageUtility.ConvertPixelFormat(System.Drawing.Bitmap,System.Drawing.Imaging.PixelFormat)">
+            <summary>
+Convert bitmap format into target pixel format. It is useful to convert indexed pixel format
+to regular RGB, because indexed format cannot get pixel values by lockBits().
+</summary>
+        </member>
+        <member name="M:FaceSdk.ImageUtility.BitsPerPixel(System.Drawing.Imaging.PixelFormat)">
+            <summary>
+Get bits-per-pixel of given pixel format
+</summary>
+            <summary>
+Convert GDI PixelFormat values to BitsPerPixel
+</summary>
+        </member>
+        <member name="M:FaceSdk.ImageUtility.IsIndexedFormat(System.Drawing.Imaging.PixelFormat)">
+            <summary>
+Check if the bitmap is an index format
+</summary>
+        </member>
+        <member name="T:FaceSdk.ImageUtility">
+            <summary>
+Image utility functions converting platform-dependent bitmap types into Face SDK image.
+</summary>
+        </member>
+        <member name="M:facesdk.ModelMoveToDataChunk(System.Void*)">
+            <summary>
+Skip model header and point to actual data
+</summary>
+        </member>
+        <member name="M:facesdk.ModelVerifyHeader(System.UInt32,System.Void*)">
+            <summary>
+Check if the input buffer contains a valid model file
+</summary>
+            <return>
+S_OK if a valid Face SDK model file
+E_INVALIDARG
+E_FAIL for invalid file
+</return>
+        </member>
+        <member name="M:FaceSdk.FaceAttributePoseImpl.CalculatePoseEnumeration(FaceSdk.FacePose)">
+            <summary>Get face pose enumeration from FacePose in three angles.</summary>
+            <param name="pose">Pose in roll/yaw/pitch angles</param>
+            <returns>Face pose in enumeration</returns>
+            <summary>
+Get face pose enumeration from face pose in angle
+</summary>
+            <param name="pose">Pose in angle</param>
+            <returns>
+Face pose in enumeration
+</returns>
+        </member>
+        <member name="M:FaceSdk.FaceAttributePoseImpl.AnalyzePose(FaceSdk.Image,FaceSdk.FaceLandmarks)">
+            <summary>Gets face's head-pose attribute.</summary>
+            <param name="faceImage">Input image.</param>
+            <param name="faceLandmarks">Input landmarks.</param>
+            <return>FacePose object that represent analyzed results.</return>
+        </member>
+        <member name="M:FaceSdk.FaceAttributePoseImpl.Analyze(FaceSdk.Image,FaceSdk.FaceLandmarks)">
+            <summary>Gets face's head-pose attribute.</summary>
+            <param name="faceImage">Input image.</param>
+            <param name="faceLandmarks">Input landmarks.</param>
+            <return>Object that represent analyzed results.</return>
+        </member>
+        <member name="T:FaceSdk.FaceAttributePoseImpl">
+            <summary>
+Estimates face's head-pose and outputs with roll/yaw/pitch angles.
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceAttributePose.CalculatePoseEnumeration(FaceSdk.FacePose)">
+            <summary>Get face pose enumeration from FacePose in three angles.</summary>
+            <param name="pose">Pose in roll/yaw/pitch angles</param>
+            <returns>Face pose in enumeration</returns>
+        </member>
+        <member name="M:FaceSdk.FaceAttributePose.AnalyzePose(FaceSdk.Image,FaceSdk.FaceLandmarks)">
+            <summary>Gets face's head-pose attribute.</summary>
+            <param name="faceImage">Input image.</param>
+            <param name="faceLandmarks">Input landmarks.</param>
+            <return>FacePose object that represent analyzed results.</return>
+        </member>
+        <member name="M:FaceSdk.FaceAttributePose.Analyze(FaceSdk.Image,FaceSdk.FaceLandmarks)">
+            <summary>Gets face's head-pose attribute.</summary>
+            <param name="faceImage">Input image.</param>
+            <param name="faceLandmarks">Input landmarks.</param>
+            <return>Object that represent analyzed results.</return>
+        </member>
+        <member name="T:FaceSdk.FaceAttributePose">
+            <summary>
+Estimates face's head-pose and outputs with roll/yaw/pitch angles.
+</summary>
+        </member>
+        <member name="T:FaceSdk.FacePoseValue">
+            <summary>
+Discrete face pose values. Pitch is not supported.
+</summary>
+            <remarks>
+R - Roll, in-plane rotation, positive in clock-wise, negative in counter-clock-wise, from viewer's perspective
+Y - Yaw, turning in horizontal plane, positive in right, negative in left, from viewer's perspective
+N - Negative
+P - Positive
+For example, R_N30P0_Y_N45N30 means -30 ~ +0 degree in-plane rotation and -45 ~ -30 tuning in horizontal plane
+</remarks>
+        </member>
+        <member name="F:R_N90N20_Y_P40P90">
+            <summary>
+Right profile, with a counter clockwise rotation angle of 30 degrees in the image plane.
+</summary>
+        </member>
+        <member name="F:R_N90N20_Y_N90N40">
+            <summary>
+Left profile, with a counter clockwise rotation angle of 30 degrees in the image plane.
+</summary>
+        </member>
+        <member name="F:R_N90N20_Y_P20P40">
+            <summary>
+Half right profile, with a counter clockwise rotation angle of 30 degrees in the image plane.
+</summary>
+        </member>
+        <member name="F:R_N90N20_Y_N40N20">
+            <summary>
+Half left profile, with a counter clockwise rotation angle of 30 degrees in the image plane.
+</summary>
+        </member>
+        <member name="F:R_N90N20_Y_N20P20">
+            <summary>
+Frontal, with a counter clockwise rotation angle of 30 degrees in the image plane.
+</summary>
+        </member>
+        <member name="F:R_N90N20">
+enumeration value for test counter clock-wise rotation
+</member>
+        <member name="F:R_P20P90_Y_P40P90">
+            <summary>
+Right profile, with a clockwise rotation angle of 30 degrees in the image plane.
+</summary>
+        </member>
+        <member name="F:R_P20P90_Y_N90N40">
+            <summary>
+Left profile, with a clockwise rotation angle of 30 degrees in the image plane.
+</summary>
+        </member>
+        <member name="F:R_P20P90_Y_P20P40">
+            <summary>
+Half right, with a clockwise rotation angle of 30 degrees in the image plane.
+</summary>
+        </member>
+        <member name="F:R_P20P90_Y_N40N20">
+            <summary>
+Half left, with a clockwise rotation angle of 30 degrees in the image plane.
+</summary>
+        </member>
+        <member name="F:R_P20P90_Y_N20P20">
+            <summary>
+Frontal, with a clockwise rotation angle of 30 degrees in the image plane.
+</summary>
+        </member>
+        <member name="F:R_P20P90">
+enumeration value for test clock-wise rotation
+</member>
+        <member name="F:R_N20P20_Y_P40P90">
+            <summary>
+over 45 degree rotation to the right
+</summary>
+        </member>
+        <member name="F:R_N20P20_Y_N90N40">
+            <summary>
+over 45 degree rotation to the left 
+</summary>
+        </member>
+        <member name="F:R_N20P20_Y_P20P40">
+            <summary>
+30-45 degree rotation to the right
+</summary>
+        </member>
+        <member name="F:R_N20P20_Y_N40N20">
+            <summary>
+30-45 degree rotation to the left
+</summary>
+        </member>
+        <member name="F:R_N20P20_Y_N20P20">
+            <summary>
+Frontal
+</summary>
+        </member>
+        <member name="F:R_N5P5_Y_N10P10">
+            <summary>
+Strict frontal profile
+</summary>
+        </member>
+        <member name="F:FaceSdk.FacePose.Pitch">
+            <summary>
+Tuning head up and down in degrees. Positive values for turning up, negative values for turning down.
+(Pitch analysis is not supported yet)
+</summary>
+        </member>
+        <member name="F:FaceSdk.FacePose.Yaw">
+            <summary>
+Tuning head left and right from viewer's perspective in degrees. Positive values for turning right, 
+negative values for turning left.
+Range +/- 90
+</summary>
+        </member>
+        <member name="F:FaceSdk.FacePose.Roll">
+            <summary>
+In-plane rotation from viewer's perspective in degrees. Positive values for clockwise, and negative 
+values for counterclockwise.
+Range +/-90
+</summary>
+        </member>
+        <member name="T:FaceSdk.FacePose">
+            <summary>
+Face's head-pose in Roll/Yaw/Pitch indicating the direction a face turns to. A straight-ahead frontal face
+is of pose (0, 0, 0).
+</summary>
+        </member>
+        <member name="M:FaceSdk.WrapperUtility.GroupResultsNativeToManaged(facesdk.FaceGroupingResult*)">
+            <summary>
+TODO: complete comments
+</summary>
+        </member>
+        <member name="M:FaceSdk.WrapperUtility.DeleteNativeFaceFeatureList(System.Void**,System.Int32)">
+            <summary>
+TODO: complete comments
+</summary>
+        </member>
+        <member name="M:FaceSdk.WrapperUtility.FaceFeatureListManagedToNative(System.Collections.Generic.List`1{FaceSdk.FaceFeature})">
+            <summary>
+TODO: complete comments
+</summary>
+        </member>
+        <member name="M:FaceSdk.WrapperUtility.DeleteNativePersonList(facesdk.Person*,System.Int32)">
+            <summary>
+TODO: complete comments
+</summary>
+        </member>
+        <member name="M:FaceSdk.WrapperUtility.PersonListManagedToNative(System.Collections.Generic.List`1{FaceSdk.Person},System.Int32)">
+            <summary>
+TODO: complete comments
+</summary>
+        </member>
+        <member name="M:FaceSdk.WrapperUtility.PixelFormatNativeToManaged(facesdk.PixelFormat)">
+            <summary>
+TODO: complete comments
+</summary>
+        </member>
+        <member name="M:FaceSdk.WrapperUtility.PixelFormatManagedToNative(FaceSdk.PixelFormat)">
+            <summary>
+TODO: complete comments
+</summary>
+        </member>
+        <member name="M:FaceSdk.WrapperUtility.RectangleManagedToNative(FaceSdk.Rectangle,facesdk.Rectangle*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+            <summary>
+TODO: complete comments
+</summary>
+        </member>
+        <member name="M:FaceSdk.WrapperUtility.RectangleNativeToManaged(facesdk.Rectangle,FaceSdk.Rectangle@)">
+            <summary>
+TODO: complete comments
+</summary>
+        </member>
+        <member name="M:FaceSdk.WrapperUtility.LandmarksManagedToNative(FaceSdk.FaceLandmarks,System.Int32,System.Single*)">
+            <summary>
+Convert managed landmark type to native float array.
+</summary>
+        </member>
+        <member name="M:FaceSdk.WrapperUtility.LandmarksNativeToManaged(System.Int32,System.Single*,FaceSdk.FaceLandmarks)">
+            <summary>
+Convert native float array to landmarks format into managed structure with names.
+</summary>
+        </member>
+        <member name="T:FaceSdk.WrapperUtility">
+            <summary>
+Helper functions handling face data type conversion between managed and native.
+</summary>
+        </member>
+        <member name="M:facesdk.FaceRecognition.Compact(System.Int32!System.Runtime.CompilerServices.IsConst,System.Void*!System.Runtime.CompilerServices.IsConst*,System.Int32!System.Runtime.CompilerServices.IsConst,System.Int32*)">
+            <summary>
+Compresses redundant face features from each person in a person list. This can improve identification 
+performance by removing unnecessary faces.
+</summary>
+            <param name="faceCount">Number of face features to compact</param>
+            <param name="faces">Face feature to compact</param>
+            <param name="targetFaceCount">Number of face features to compact to. It should be larger than 0.</param>
+            <param name="compactedFaceIndexes">User-provided output buffer for the compacted face list. Each list element is the index to input faces array.</param>
+            <returns>
+Output compacted face feature indexes in compactedFaceFeatures. <br />
+ E_INVALIDARG if required parameters are NULL.<br />
+ E_FACESDK_UNINITIALIZED for class is not initialized.<br />
+ E_FAIL for generic errors.
+</returns>
+        </member>
+        <member name="M:facesdk.FaceRecognition.FindSimilarFaces(System.Void*!System.Runtime.CompilerServices.IsConst,System.Int32!System.Runtime.CompilerServices.IsConst,System.Void*!System.Runtime.CompilerServices.IsConst*,System.Single!System.Runtime.CompilerServices.IsConst,System.Single!System.Runtime.CompilerServices.IsConst,System.Int32!System.Runtime.CompilerServices.IsConst,System.Int32*,System.Int32*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+            <summary>
+Find similar-looking faces from a collection of faces against by a query face.
+</summary>
+            <param name="queryFace">Query face</param>
+            <param name="faceCount">Number of faces in face collection</param>
+            <param name="faces">A face collection</param>
+            <param name="inclusiveThreshold">Feature distance threshold in the range of (0..1.0f). Faces within this threshold the are considered as similar faces.</param>
+            <param name="exclusiveThreshold">Feature distance threshold in the range of (0..1.0f), and must be no smaller than inclusiveThreshold. Faces beyond this threshold are not considered as similar faces.</param>
+            <param name="maxSimilarFacesReturned">The maximum number of caller-provided output buffer. The value should be smaller than faceCount.</param>
+            <param name="similarFaceIndexes">Caller-provided similar face output buffer. Each element is the index to the input face collection.</param>
+            <param name="actualSimilarFaceReturned">Output the number of face index actually returned in similarFaceIndexes. The unfilled element will be cleared as -1.</param>
+            <returns>
+Returns similarFaceIndexes containing the indexes pointing input faces array and actualSimilarFaceReturned
+contains the number of meaningful indexes.
+ S_OK if succeeded;<br />
+ E_INVALIDARG if required parameters are NULL.<br />
+ E_FACESDK_UNINITIALIZED for class is not initialized.<br />
+ E_FAIL for generic errors.
+</returns>
+            <remarks>
+This algorithm uses an iteration strategy based on distances between query faces and faces in collections.
+Developers can start from similarTheshold at 0.5, extendedSimilarTheshold at 2/3 of the whole distance 
+range [0...1], 0.66, and then adjust the threshold for better customized thresholds.
+</remarks>
+        </member>
+        <member name="M:facesdk.FaceRecognition.FreeGroupingResult(facesdk.FaceGroupingResult*)">
+            <summary>
+Release memory for a FaceGroupingResult instance.
+</summary>
+        </member>
+        <member name="M:facesdk.FaceRecognition.Group(System.Int32!System.Runtime.CompilerServices.IsConst,System.Void*!System.Runtime.CompilerServices.IsConst*,System.Single!System.Runtime.CompilerServices.IsConst,System.Single!System.Runtime.CompilerServices.IsConst,facesdk.FaceGroupingResult**!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+            <summary>
+Divide faces into groups. Faces in each group belongs to a same person or similar-looking.
+</summary>
+            <param name="faceCount">Number of ungrouped faces</param>
+            <param name="faces">Faces to be grouped</param>
+            <param name="inclusiveThreshold">A distance threshold ranges [0, 1.0f]. If distance between a face to a
+group is shorter than this value, then the face will be included into the group.</param>
+            <param name="exclusiveThreshold">A distance threshold ranges [0, 1.0f]. If distance between a face to a
+group is larger than this value, then the face will not be included to the group. exclusiveThreshold should 
+be always no smaller than inclusiveThreshold.</param>
+            <param name="groupingResult">Grouping result in a structure</param>
+            <returns>
+FaceGroupingResult contains an array of face groups ranked by group size, and a messy group contains the faces
+do not have similar faces.<br />
+ S_OK if succeeded;<br />
+ E_INVALIDARG if required parameters are NULL.<br />
+ E_FACESDK_UNINITIALIZED for class is not initialized.<br />
+ E_FAIL for generic errors.
+</returns>
+            <remarks>
+Developers can start from the inclusiveThreshold with 0.33f and exclusiveThreshold with 0.66f then adjust 
+for better result on a particular face data distribution.
+</remarks>
+        </member>
+        <member name="M:facesdk.FaceRecognition.Identify(System.Int32!System.Runtime.CompilerServices.IsConst,System.Void*!System.Runtime.CompilerServices.IsConst,System.Int32!System.Runtime.CompilerServices.IsConst,facesdk.Person!System.Runtime.CompilerServices.IsConst*,System.Int32!System.Runtime.CompilerServices.IsConst,facesdk.PersonIdentified*,System.Int32*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+            <summary>
+Identify a person from a group of persons by a query face.
+</summary>
+            <param name="featureSize">a face feature's vector size in bytes.</param>
+            <param name="queryFace">a face feature representing a face to be recognized.</param>
+            <param name="personCount">Number of persons in enrolled person group.</param>
+            <param name="persons">a list of persons containing persons' face features to search against</param>
+            <param name="maxCandidatesReturned">Maximum of returned candidates. It should be larger than 0, and less than person item count. </param>
+            <param name="personsIdentified">Identified persons output ordered by descending confidence.</param>
+            <param name="actualCandidatsReturned">The number of actual identified candidates..</param>
+            <returns>
+ S_OK if succeeded;<br />
+ E_INVALIDARG if required parameters are NULL.<br />
+ E_FACESDK_UNINITIALIZED for class is not initialized.<br />
+ E_FAIL for generic errors.
+</returns>
+            <remarks>
+The candidates returned could be less than maxCandidatesReturned. The unfilled PersonIdentified index
+values will be set with -1.
+</remarks>
+        </member>
+        <member name="M:facesdk.FaceRecognition.GetFaceFeatureDistance(System.Int32!System.Runtime.CompilerServices.IsConst,System.Void*!System.Runtime.CompilerServices.IsConst,System.Void*!System.Runtime.CompilerServices.IsConst,System.Single*!System.Runtime.CompilerServices.IsImplicitlyDereferenced)">
+            <summary>
+Compute the distance between two face features. The shorter distance the more similar two faces are.
+</summary>
+            <param name="size">face feature vector size in bytes.</param>
+            <param name="face1">face feature 1.</param>
+            <param name="face2">face feature 2.</param>
+            <param name="distance">Output distance value in range of [0..1.0f].</param>
+            <returns>
+ S_OK if succeeded;<br />
+ E_INVALIDARG if face1 or face2 is NULL;<br />
+ E_FACESDK_UNINITIALIZED for class is not initialized.<br />
+ E_FAIL for other errors.
+</returns>
+        </member>
+        <member name="M:facesdk.FaceRecognition.ExtractFaceFeature(facesdk.Image!System.Runtime.CompilerServices.IsConst,System.Int32!System.Runtime.CompilerServices.IsConst,System.Single!System.Runtime.CompilerServices.IsConst*,System.Int32!System.Runtime.CompilerServices.IsConst,System.Void*)">
+            <summary>
+Extract a face's FaceFeature from input image.
+</summary>
+            <param name="faceImage">Input image contain the face to extract face feature.</param>
+            <param name="landmarkCount">Number of face landmarks, e.g. 27-point FaceLandmarks the count is 27.</param>
+            <param name="landmarks">Face landmark coordinates packed as a float array (x1, y1, x2, y2 ... xn, yn) for 
+locating face components in input image</param>
+            <param name="featureSizeInBytes">User-provided FaceFeature vector size in bytes.</param>
+            <param name="faceFeature">User-provided FaceFeature for output.</param>
+            <returns>
+The output FaceFeature object contains the face information for recognition functions.
+ S_OK if succeeded;<br />
+ E_INVALIDARG for bad image parameters, landmarks null or size miss-match and faceFeature.<br />
+ E_FACESDK_UNINITIALIZED if class is not initialized.<br />
+ E_OUTOFMEMORY if failing to allocate memory;<br />
+ E_FAIL for other errors.
+</returns>
+        </member>
+        <member name="M:facesdk.FaceRecognition.GetFaceRecognitionThresholds">
+            <summary>
+Algorithm-specific distance threshold to distinguish two face features
+</summary>
+        </member>
+        <member name="M:facesdk.FaceRecognition.GetFaceLandmarkType">
+            <summary>
+The landmark type supported by this class.
+</summary>
+        </member>
+        <member name="M:facesdk.FaceRecognition.GetFaceFeatureSize">
+            <summary>
+Get face feature vector size in bytes. It comes from model file, only after Initialize() call 
+it returns a valid value.
+</summary>
+            <returns>Byte size of face feature vector. Returns -1 if recognition class is uninitialized.</returns>
+        </member>
+        <member name="M:facesdk.FaceRecognition.Initialize(System.UInt64!System.Runtime.CompilerServices.IsConst,System.Void*!System.Runtime.CompilerServices.IsConst)">
+            <summary>
+Initialize recognition class.
+</summary>
+            <param name="modelSize">Model size in bytes.</param>
+            <param name="model">Recognition model data. The pointer must be 16-bytes aligned</param>
+            <returns>
+ S_OK if succeeded;<br />
+ E_INVALIDARG for wrong parameters.<br />
+ E_FACESDK_INVALID_MODEL specifically for wrong model data, non-16bytes-aligned model buffer<br />
+ E_OUTOFMEMORY for internal memory allocation failure;<br />
+ E_FAIL for other errors.
+</returns>
+            <remarks>
+Model buffer must be 16-byte aligned and caller should keep model data during class life cycle.
+</remarks>
+        </member>
+        <member name="T:facesdk.FaceRecognition">
+            <summary>
+Face recognition base class. Caller should use the subclass.
+</summary>
+        </member>
+        <member name="F:facesdk.FaceRecognitionThresholds.GroupExclusiveThreshold">
+            <summary>
+A distance threshold in the range of [0, 1.0f]. If distance between a face to a group is larger than 
+this value, then the face will not be included to the group. exclusiveThreshold should be always no smaller 
+than GroupInclusiveThreshold.
+</summary>
+        </member>
+        <member name="F:facesdk.FaceRecognitionThresholds.GroupInclusiveThreshold">
+            <summary>
+A distance threshold in the range of [0, 1.0f]. If distance between a face to a group is shorter than 
+this value, then the face will be included into the group.
+</summary>
+        </member>
+        <member name="F:facesdk.FaceRecognitionThresholds.FindSimilarFacesExclusiveThreshold">
+            <summary>
+A distance threshold in the range of [0, 1.0f], and must be no smaller than 
+FindSimilarFacesInclusiveThreshold. Faces beyond this threshold are not considered as similar faces.
+</summary>
+        </member>
+        <member name="F:facesdk.FaceRecognitionThresholds.FindSimilarFacesInclusiveThreshold">
+            <summary>
+A distance threshold in the range of [0, 1.0f]. Faces within this threshold the are considered as 
+similar faces.
+</summary>
+        </member>
+        <member name="F:facesdk.FaceRecognitionThresholds.SamePersonThreshold">
+            <summary>
+A distance threshold in the range of [0, 1.0f]. If the distance returned from GetFaceFeatureDistance() is
+below this threshold, it indicates that the two faces are similar enough and belong to a same person.
+</summary>
+        </member>
+        <member name="T:facesdk.FaceRecognitionThresholds">
+            <summary>
+Thresholds for different recognition scenarios
+</summary>
+        </member>
+        <member name="F:facesdk.FaceGroupingResult.MessyGroupSize">
+            <summary>
+MessyGroup size in number of elements.
+</summary>
+        </member>
+        <member name="F:facesdk.FaceGroupingResult.MessyGroup">
+            <summary>
+A special face group that each face is not similar to any other faces in the original input FaceFeatures.
+MessyGroup's element is the index to the original input FaceFeatures. MessyGroup could be null indicating 
+all faces found similar faces and grouped.
+</summary>
+        </member>
+        <member name="F:facesdk.FaceGroupingResult.GroupCount">
+            <summary>
+Number of elements in Groups
+</summary>
+        </member>
+        <member name="F:facesdk.FaceGroupingResult.GroupSizes">
+            <summary>
+Size of each group, i.e. number of the element in each group.
+</summary>
+        </member>
+        <member name="F:facesdk.FaceGroupingResult.Groups">
+            <summary>
+Array of face groups by similarity. Each group is an index array. Each index points to the original 
+input FaceFeatures. Groups can be null indicating no faces are similar. The ungrouped faces 
+are included in MessyGroup.
+</summary>
+        </member>
+        <member name="T:facesdk.FaceGroupingResult">
+            <summary>
+Face Grouping result containing groups of similar faces returned from Group(), and caller release it by 
+calling FreeGroupingResult().
+</summary>
+        </member>
+        <member name="F:facesdk.PersonIdentified.MostMatchedFaceIndex">
+            <summary>
+Indicating the most matched face in the person's face features.
+</summary>
+        </member>
+        <member name="F:facesdk.PersonIdentified.Confidence">
+            <summary>
+Confidence of how the query face matches the identified person, ranging [0.0f, 1.0f]
+</summary>
+        </member>
+        <member name="F:facesdk.PersonIdentified.PersonIndex">
+            <summary>
+Identified <see cref="T:facesdk.Person" /> as the index of input person list.
+</summary>
+        </member>
+        <member name="T:facesdk.PersonIdentified">
+            <summary>
+Identified person returned from Identify().
+</summary>
+        </member>
+        <member name="F:facesdk.Person.FaceCount">
+            <summary>
+Number of FaceFeatures.
+</summary>
+        </member>
+        <member name="F:facesdk.Person.FaceFeatures">
+            <summary>
+A list of face features extracted from this person's representative face images.
+</summary>
+        </member>
+        <member name="T:facesdk.Person">
+            <summary>
+A Person used in face identification is a list of FaceFeatures extracted from this person's representative faces.
+</summary>
+        </member>
+        <member name="D:facesdk.FaceFeature">
+            <summary>
+Face feature vector representing a face's information and used in recognition functions. 
+FaceFeature instance is retrieved from FaceRecognition class's ExtractFaceFeature() method.
+FaceFeature size varies from one recognition algorithm to another.
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceRecognition.Compact(System.Collections.Generic.List`1{FaceSdk.FaceFeature},System.Int32!System.Runtime.CompilerServices.IsConst)">
+            <summary>
+Compresses redundant face features from each person in a person list. This can improve identification 
+performance by removing unnecessary faces.
+</summary>
+            <param name="faceFeatures">A person's face features to compact.</param>
+            <param name="targetFaceCount">Number of face features to compact to. It should be larger than 0.</param>
+            <returns>Compacted face features.</returns>
+            <exception cref="T:System.ArgumentNullException">Throw when persons are null or empty.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when targetFaceCount is smaller than 1.</exception>
+        </member>
+        <member name="M:FaceSdk.FaceRecognition.FindSimilarFaces(FaceSdk.FaceFeature,System.Collections.Generic.List`1{FaceSdk.FaceFeature},System.Single,System.Single)">
+            <summary>
+Find similar-looking faces from a collection of faces against by a query face.
+</summary>
+            <param name="queryFace">Face to find its similar looking faces.</param>
+            <param name="faceFeatures">A face list to search against</param>
+            <param name="inclusiveThreshold">Feature distance threshold in the range of (0..1.0f). Faces within this threshold the are considered as similar faces.</param>
+            <param name="exclusiveThreshold">Feature distance threshold in the range of (0..1.0f), and must be no smaller than inclusiveThreshold. Faces beyond this threshold are not considered as similar faces.</param>
+            <returns>
+Similar face index array that each index points to input face list and ranked by similarity.
+</returns>
+            <exception cref="T:System.ArgumentNullException">Throw when queryFace or faceFeatures object is empty.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when thresholds out of range (0..1.0f)</exception>
+            <remarks>
+The result depends on algorithm and data. Developers can start from inclusiveTheshold at 0.5f, 
+exclusiveThreshold at 0.66f, and then adjust the threshold for better customized thresholds.
+</remarks>
+        </member>
+        <member name="M:FaceSdk.FaceRecognition.Group(System.Collections.Generic.List`1{FaceSdk.FaceFeature},System.Single,System.Single)">
+            <summary>
+Divide faces into groups. Faces in each group belongs to a same person or similar-looking. 
+</summary>
+            <param name="faces">Faces to be divided into groups</param>
+            <param name="inclusiveThreshold">A distance threshold ranges [0, 1.0f]. If distance between a face to a
+group is shorter than this value, then the face will be included into the group.</param>
+            <param name="exclusiveThreshold">A distance threshold ranges [0, 1.0f]. If distance between a face to a
+group is larger than this value, then the face will not be included to the group. exclusiveThreshold should 
+be always no smaller than inclusiveThreshold.</param>
+            <returns>
+FaceGroupingResult contains an array of face groups ranked by group size, and a messy group contains the faces
+do not have similar faces.
+</returns>
+            <exception cref="T:System.ArgumentNullException">Throw when input List&lt;FaceFeature^&gt; object is empty</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when inGroupThreshold or outGroupThreshold 
+are not within [0..1] range, or outGroupThreshold is smaller than inGroupThreshold.</exception>
+            <remarks>
+Developers can start from the inclusiveThreshold with 0.33f and exclusiveThreshold with 0.66f then adjust 
+for better result on a particular face data distribution.
+</remarks>
+        </member>
+        <member name="M:FaceSdk.FaceRecognition.Identify(FaceSdk.FaceFeature,System.Collections.Generic.List`1{FaceSdk.Person},System.Int32)">
+            <summary>
+Identify a person from a group of persons by a query face.
+</summary>
+            <param name="queryFace">FaceFeature of a face to identify</param>
+            <param name="persons">a list of persons containing persons' face features to search against</param>
+            <param name="maxCandidatesReturned">Maximum of returned candidates. It should be larger than 0, and less 
+than person item count. 
+</param>
+            <returns>
+FaceIdentificationResult object that contains the identified person sorted descending to confidences.
+</returns>
+            <exception cref="T:System.ArgumentNullException">Throw when queryFace and personList are empty.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when maxCandidatesReturned is larger than 
+peronList item count, or personList item count is less than 1.</exception>
+            <exception cref="T:System.OutOfMemoryException">Throw when failed to allocate internal buffers.</exception>
+            <remarks />
+        </member>
+        <member name="M:FaceSdk.FaceRecognition.GetFaceRecognitionThresholds">
+            <summary>
+Algorithm-specific distance threshold to distinguish two face features
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceRecognition.GetFaceFeatureDistance(FaceSdk.FaceFeature,FaceSdk.FaceFeature)">
+            <summary>
+Compute the distance between two face features. The shorter distance the more similar two faces are.
+</summary>
+            <param name="face1">face feature 1.</param>
+            <param name="face2">face feature 2.</param>
+            <returns>Distance value between two face features, ranges [0..1.0f].</returns>
+            <exception cref="T:System.ArgumentNullException">Throw when face1 or face2 are empty.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when face1 or face2 feature size doesn't match recognition class requirement.</exception>
+            <exception cref="T:System.InvalidOperationException">Throw when class is not initialized.</exception>
+            <exception cref="T:System.Exception">Throw when other errors.</exception>
+        </member>
+        <member name="M:FaceSdk.FaceRecognition.ExtractFaceFeature(FaceSdk.Image,FaceSdk.FaceLandmarks,FaceSdk.FaceFeature)">
+            <summary>
+Extract a face's FaceFeature from input image.
+</summary>
+            <param name="faceImage">Input image contain the face to extract face feature.</param>
+            <param name="landmarks">The face's FaceLandmarks for locating face components in input image</param>
+            <param name="faceFeature">User-provided face feature object for output.</param>
+            <exception cref="T:System.ArgumentNullException">Throw when image, landmarks, or faceFeature is empty.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when faceImage pixel format, landmarks size, or faceFeaturreSize are incompatible to recognition class requirement.</exception>
+            <exception cref="T:System.InvalidOperationException">Throw when class is not initialized.</exception>
+            <exception cref="T:System.Exception">Throw when other failures.</exception>
+            <remarks>
+The output FaceFeature object contains the face information for recognition functions.
+Face feature vector size is not small. User provides faceFeature object can avoid frequent memory allocation.
+</remarks>
+        </member>
+        <member name="M:FaceSdk.FaceRecognition.ExtractFaceFeature(FaceSdk.Image,FaceSdk.FaceLandmarks)">
+            <summary>
+Extract a face's FaceFeature from input image.
+</summary>
+            <param name="faceImage">Input image contain the face to extract face feature.</param>
+            <param name="landmarks">The face's FaceLandmarks for locating face components in input image</param>
+            <returns>Extracted FaceFeature object of input face</returns>
+            <exception cref="T:System.ArgumentNullException">Throw when image, landmarks, or faceFeature is empty.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">Throw when faceImage pixel format, landmarks size, or faceFeaturreSize are incompatible to recognition class requirement.</exception>
+            <exception cref="T:System.InvalidOperationException">Throw when class is not initialized.</exception>
+            <exception cref="T:System.Exception">Throw when other failures.</exception>
+        </member>
+        <member name="P:FaceSdk.FaceRecognition.FaceFeatureSize">
+            <summary>
+Gets face feature vector size. Inherited classes should override this property explicitly.
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceRecognition">
+            <summary>
+FaceRecognition class
+</summary>
+        </member>
+        <member name="F:FaceSdk.FaceRecognitionThresholds.GroupExclusiveThreshold">
+            <summary>
+A distance threshold in the range of [0, 1.0f]. If distance between a face to a group is larger than 
+this value, then the face will not be included to the group. exclusiveThreshold should be always no smaller 
+than GroupInclusiveThreshold.
+</summary>
+        </member>
+        <member name="F:FaceSdk.FaceRecognitionThresholds.GroupInclusiveThreshold">
+            <summary>
+A distance threshold in the range of [0, 1.0f]. If distance between a face to a group is shorter than 
+this value, then the face will be included into the group.
+</summary>
+        </member>
+        <member name="F:FaceSdk.FaceRecognitionThresholds.FindSimilarFacesExclusiveThreshold">
+            <summary>
+A distance threshold in the range of [0, 1.0f], and must be no smaller than 
+FindSimilarFacesInclusiveThreshold. Faces beyond this threshold are not considered as similar faces.
+</summary>
+        </member>
+        <member name="F:FaceSdk.FaceRecognitionThresholds.FindSimilarFacesInclusiveThreshold">
+            <summary>
+A distance threshold in the range of [0, 1.0f]. Faces within this threshold the are considered as 
+similar faces.
+</summary>
+        </member>
+        <member name="F:FaceSdk.FaceRecognitionThresholds.SamePersonThreshold">
+            <summary>
+A distance threshold in the range of [0, 1.0f]. If the distance returned from GetFaceFeatureDistance() is
+below this threshold, it indicates that the two faces are similar enough and belong to a same person.
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceRecognitionThresholds">
+            <summary>
+Thresholds for different recognition scenarios
+</summary>
+        </member>
+        <member name="D:FaceSdk.FaceFindSimilarResult">
+            <summary>
+FindSimilarFace result as index array. Each index points to the input face list. 
+</summary>
+        </member>
+        <member name="F:FaceSdk.FaceGroupingResult.MessyGroup">
+            <summary>
+A special face group that each face is not similar to any other faces in original List&lt;FaceFeature^&gt;.
+MessyGroup could be an empty array to indicate all faces are properly grouped.
+</summary>
+        </member>
+        <member name="F:FaceSdk.FaceGroupingResult.Groups">
+            <summary>
+Array of face groups by similarity. Each group is an index array. Each index points to the original 
+input FaceFeatures. Groups can be an empty array indicating no faces are similar. The ungrouped faces 
+are included in MessyGroup.
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceGroupingResult">
+            <summary>
+Face Grouping result containing groups of similar faces returned from Group().
+</summary>
+        </member>
+        <member name="D:FaceSdk.FaceIdentificationResult">
+            <summary>
+Identified person array returned from Identify().
+</summary>
+        </member>
+        <member name="F:FaceSdk.PersonIdentified.Confidence">
+            <summary>
+Confidence of how the query face matches the identified person, ranging [0.0f, 1.0f]
+</summary>
+        </member>
+        <member name="F:FaceSdk.PersonIdentified.Person">
+            <summary>
+Identified person.
+</summary>
+        </member>
+        <member name="T:FaceSdk.PersonIdentified">
+            <summary>
+Identified person returned from Identify().
+</summary>
+        </member>
+        <member name="M:FaceSdk.Person.#ctor(System.Collections.Generic.List`1{FaceSdk.FaceFeature},System.Object)">
+            <summary>
+Initialize person by face features and specified context
+</summary>
+            <param name="faceFeatures">Face features belongs to this person.</param>
+            <param name="context">Specified context associated to this person.</param>
+        </member>
+        <member name="M:FaceSdk.Person.#ctor">
+            <summary>
+Initializes a new instance of the Person class.
+</summary>
+        </member>
+        <member name="P:FaceSdk.Person.Context">
+            <summary>
+Gets and sets the caller-provided data context to this person, e.g. can be name, Id string.
+</summary>
+        </member>
+        <member name="P:FaceSdk.Person.FaceCount">
+            <summary>
+Number of FaceFeatures.
+</summary>
+        </member>
+        <member name="P:FaceSdk.Person.FaceFeatures">
+            <summary>
+Gets and sets a list of face features extracted from this person's representative face images.
+</summary>
+        </member>
+        <member name="T:FaceSdk.Person">
+            <summary>
+A Person used in face identification is a list of FaceFeatures extracted from this person's representative faces.
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceFeature.#ctor(System.Int32)">
+            <summary>
+Initializes a new instance of the FaceFeature class with specified feature vector size.
+</summary>
+            <param name="featureSize">Face feature vector size in bytes</param>
+        </member>
+        <member name="M:FaceSdk.FaceFeature.#ctor">
+            <summary>
+Initializes a new instance of the FaceFeature class.
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceFeature.Size">
+            <summary>
+Gets the size of face feature vector size in bytes.
+</summary>
+        </member>
+        <member name="F:FaceSdk.FaceFeature.Vector">
+            <summary>
+Gets face feature vector data.
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceFeature">
+            <summary>
+Face feature vector representing a face's information and used in recognition functions. 
+FaceFeature instance is retrieved from FaceRecognition class's ExtractFaceFeature() method.
+FaceFeature size varies from one recognition algorithm to another.
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceAttributeAgeImpl">
+            <summary>
+Analyze face and returns age estimation result
+</summary>
+        </member>
+        <member name="T:facesdk.FaceAttributeAge">
+            <summary>
+Age attribute analyzer
+</summary>
+        </member>
+        <member name="M:facesdk.FaceAlgorithmBase.Initialize(System.UInt64!System.Runtime.CompilerServices.IsConst,System.Void*!System.Runtime.CompilerServices.IsConst)">
+            <summary>
+Initialize class by loading a model data into memory.
+</summary>
+            <param name="modelSize">Model data size in bytes.</param>
+            <param name="model">Pointer to model data buffer.</param>
+            <returns>
+S_OK if succeeded.<br />
+E_INVALIDARG for wrong parameters.<br />
+E_FACESDK_INVALID_MODEL specifically for wrong model data<br />
+E_OUTOFMEMORY for internal memory allocation failure.<br />
+E_FAIL for other errors.
+</returns>
+        </member>
+        <member name="T:facesdk.FaceAlgorithmBase">
+            <summary>
+Base class for all face native algorithm classes
+</summary>
+        </member>
+        <member name="F:facesdk.Image.Pixels">
+            <summary>
+Pixel buffer
+</summary>
+        </member>
+        <member name="F:facesdk.Image.PixelFormat">
+            <summary>
+Pixel format to indicate RGB or grayscale pixels
+</summary>
+        </member>
+        <member name="F:facesdk.Image.Channel">
+            <summary>
+Number of color channel/planes of this image
+</summary>
+        </member>
+        <member name="F:facesdk.Image.Stride">
+            <summary>
+Bitmap scanline stride in bytes
+</summary>
+        </member>
+        <member name="F:facesdk.Image.Height">
+            <summary>
+Bitmap height in pixels
+</summary>
+        </member>
+        <member name="F:facesdk.Image.Width">
+            <summary>
+Bitmap width in pixels
+</summary>
+        </member>
+        <member name="T:facesdk.Image">
+            <summary>
+Represents decoded Bitmap
+</summary>
+        </member>
+        <member name="T:facesdk.PixelFormat">
+            <summary>
+Image pixel formats
+</summary>
+        </member>
+        <member name="T:facesdk.FaceLandmarkType">
+            <summary>
+Supported FaceLandmark types. 
+</summary>
+        </member>
+        <member name="D:facesdk.FaceRect">
+            <summary>
+Represents a face location in image. Face Rect is a rectangular area including eyes, nose, mouth, etc.
+</summary>
+        </member>
+        <member name="F:facesdk.Rectangle.Height">
+            <summary>   
+Height of rectangle in pixels. The bottom pixel's Y = Top + Height-1.
+</summary>
+        </member>
+        <member name="F:facesdk.Rectangle.Width">
+            <summary>   
+Width of rectangle in pixels. The right-most pixel's X = Left + Width-1.
+</summary>
+        </member>
+        <member name="F:facesdk.Rectangle.Top">
+            <summary>   
+Y coordinate of the left-top of rectangle in pixels.
+</summary>
+        </member>
+        <member name="F:facesdk.Rectangle.Left">
+            <summary>   
+X coordinate of the left-top of rectangle in pixels.
+</summary>
+        </member>
+        <member name="T:facesdk.Rectangle">
+            <summary>
+Rectangle, a axis-aligned 2D rectangular bounding box to on an image. The rectangle's
+coordinates are in image coordinate system (0,0)-(width-1,height-1).
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceAttributeAge.AnalyzeAge(FaceSdk.Image,FaceSdk.FaceLandmarks)">
+            <summary>Gets age attribute analyzed.</summary>
+            <param name="faceImage">Input image.</param>
+            <param name="faceLandmarks">Input landmarks.</param>
+            <return>Floating-point value of estimated age.</return>
+            <remarks>
+The age result has roughly 6-years' tolerance.
+</remarks>
+        </member>
+        <member name="M:FaceSdk.FaceAttributeAge.Analyze(FaceSdk.Image,FaceSdk.FaceLandmarks)">
+            <summary>Gets age attribute analyzed.</summary>
+            <param name="faceImage">Input image.</param>
+            <param name="faceLandmarks">Input landmarks.</param>
+            <return>Object that represent analyzed results.</return>
+        </member>
+        <member name="M:FaceSdk.FaceAttributeAge.Dispose">
+            <summary>Destructor</summary>
+        </member>
+        <member name="M:FaceSdk.FaceAttributeAge.#ctor(FaceSdk.Model)">
+            <summary>Constructor</summary>
+            <param name="model">Age analyzer model data</param>
+        </member>
+        <member name="T:FaceSdk.FaceAttributeAge">
+            <summary>
+Analyze face and returns Age estimation result.
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceAttribute.Analyze(FaceSdk.Image,FaceSdk.FaceLandmarks)">
+            <summary>Gets attribute analyzed.</summary>
+            <param name="faceImage">Input image.</param>
+            <param name="faceLandmarks">Input landmarks.</param>
+            <return>Object that represent analyzed results.</return>
+        </member>
+        <member name="M:FaceSdk.FaceAttribute.Dispose">
+            <summary>Destructor</summary>
+        </member>
+        <member name="T:FaceSdk.FaceAttribute">
+            <summary>
+Face Attribute analyzer class for extra face information. e.g. gender, age, head-pose, 
+skin color, expression, glasses, etc. Caller should use subclass.
+</summary>
+        </member>
+        <member name="M:FaceSdk.Model.LoadAsync(System.String)">
+            <summary>
+TODO
+</summary>
+        </member>
+        <member name="M:FaceSdk.Model.LoadAsync(System.IO.Stream)">
+            <summary>
+TODO
+</summary>
+        </member>
+        <member name="M:FaceSdk.Model.Load(System.IO.Stream)">
+            <summary>
+TODO
+</summary>
+        </member>
+        <member name="M:FaceSdk.Model.Load(System.String)">
+            <summary>
+TODO
+</summary>
+        </member>
+        <member name="M:FaceSdk.Model.#ctor">
+            <summary>
+TODO
+</summary>
+        </member>
+        <member name="P:FaceSdk.Model.Buffer">
+            <summary>
+The address-aligned pointer of the buffer of the requested size.
+</summary>
+        </member>
+        <member name="P:FaceSdk.Model.AlgorithmType">
+            <summary>
+Type of the model
+</summary>
+        </member>
+        <member name="P:FaceSdk.Model.Length">
+            <summary>
+Length of model
+</summary>
+        </member>
+        <member name="P:FaceSdk.Model.Data">
+            <summary>
+GC memory that may be a bit larger than requested size.
+</summary>
+        </member>
+        <member name="F:FaceSdk.Model._offset">
+            <summary>
+Offset in original managed buffer that after marshaling the offset is the aligned-start in 
+pinned unmanaged memory.
+</summary>
+        </member>
+        <member name="F:FaceSdk.Model._alignedBufferPtr">
+            <summary>
+Marshaled unmanaged buffer that starts from aligned address.
+</summary>
+        </member>
+        <member name="F:FaceSdk.Model._gcHandle">
+            <summary>
+To ensure _buffer GC is unmoved during multiple detection calls, this GCHandle is to pin the 
+buffer to make it at fixed address.
+</summary>
+        </member>
+        <member name="T:FaceSdk.Model">
+            <summary>
+Encapsulate face algorithm model data which is address-aligned after pinning and passing to native functions.
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceAlgorithmType">
+            <summary>
+Indicating which face class the class instance is. It is useful to check class dependencies.
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceLandmarks.ToFaceRectAngled">
+            <summary>
+Calculate an angled face rectangle which is aligned with face vertical direction from landmarks.
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceLandmarks.ToFaceRect">
+            <summary>
+Calculate an axis-aligned face rectangle from landmarks
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceLandmarks.LandmarkNames">
+            <summary>
+Names of each landmark in Landmarks property.
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceLandmarks.Count">
+            <summary>
+Total number of landmark points
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceLandmarks.LandmarkType">
+            <summary>
+Return the actual landmark type
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceLandmarks.default(System.String)">
+            <summary>
+Return specific landmark point by given name, it is case insensitive.
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceLandmarks.default(System.Int32)">
+            <summary>
+Return specific landmark point by given name, it is case insensitive.
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceLandmarks.Points">
+            <summary>
+All landmark points in an array of PointF
+</summary>
+        </member>
+        <member name="P:FaceSdk.FaceLandmarks.Name">
+            <summary>
+Return the name of this landmark type name, or landmark set instance name.
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceLandmarks.Dispose">
+            <summary>
+Destructor
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceLandmarks.#ctor(FaceSdk.FaceLandmarkType)">
+            <summary>
+TODO
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceLandmarks.#ctor(System.Int32)">
+            <summary>
+TODO
+</summary>
+        </member>
+        <member name="M:FaceSdk.FaceLandmarks.#ctor">
+            <summary>
+TODO
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceLandmarks">
+            <summary>
+Represents facial landmarks like eyes, nose, mouth in a image. Each landmark is a PointF for the location
+in image.
+</summary>
+        </member>
+        <member name="T:FaceSdk.FaceLandmarkType">
+            <summary>
+Supported FaceLandmark types. 
+</summary>
+        </member>
+        <member name="T:FaceSdk.PointF">
+            <summary>
+Represents a location on image in floats
+</summary>
+        </member>
+        <member name="D:FaceSdk.FaceRect">
+            <summary>
+Face rectangle, a axis-aligned 2D rectangular bounding box to a face on an image. The rectangle's
+coordinates are in image coordinate system (0,0)-(width-1,height-1) where (0,0) is the image left top. 
+A face rectangle is allowed to be out of image boundaries to represent faces are half in image and half 
+out of image.
+</summary>
+        </member>
+        <member name="F:FaceSdk.Image.Pixels">
+            <summary>
+Pixel buffer
+</summary>
+        </member>
+        <member name="F:FaceSdk.Image.PixelFormat">
+            <summary>
+Pixel format to indicate RGB or grayscale pixels
+</summary>
+        </member>
+        <member name="F:FaceSdk.Image.Channel">
+            <summary>
+Number of color channel/planes of this image
+</summary>
+        </member>
+        <member name="F:FaceSdk.Image.Stride">
+            <summary>
+Bitmap scanline stride in bytes
+</summary>
+        </member>
+        <member name="F:FaceSdk.Image.Height">
+            <summary>
+Bitmap height in pixels
+</summary>
+        </member>
+        <member name="F:FaceSdk.Image.Width">
+            <summary>
+Bitmap width in pixels
+</summary>
+        </member>
+        <member name="T:FaceSdk.Image">
+            <summary>
+Basic image information and decoded pixels buffer.
+</summary>
+        </member>
+        <member name="T:FaceSdk.PixelFormat">
+            <summary>
+Supported bitmap image pixel format in Face SDK
+</summary>
+        </member>
+        <member name="M:FaceSdk.Rectangle.op_Inequality(FaceSdk.Rectangle,FaceSdk.Rectangle)">
+            <summary>
+TODO
+</summary>
+        </member>
+        <member name="M:FaceSdk.Rectangle.op_Equality(FaceSdk.Rectangle,FaceSdk.Rectangle)">
+            <summary>
+TODO
+</summary>
+        </member>
+        <member name="P:FaceSdk.Rectangle.Empty">
+            <summary>
+TODO
+</summary>
+        </member>
+        <member name="T:FaceSdk.Rectangle">
+            <summary>
+Represents a 2D rectangular area on image
+</summary>
+        </member>
+    </members>
+</doc>
