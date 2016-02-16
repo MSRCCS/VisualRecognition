@@ -215,6 +215,7 @@ namespace TsvImage
             ParserX.AddTask<ArgsCeleb>(Celeb, "Celebrity selection");
             ParserX.AddTask<ArgsCelebRemove>(CelebRemove, "Celebrity removal for ancient people");
             ParserX.AddTask<ArgsClassVariance>(ClassVariance, "Calculate class variance");
+            ParserX.AddTask<ArgsParseResult>(ParseResult, "Parse Caffe evaluation result for accuracy per class");
             if (ParserX.ParseArgumentsWithUsage(args))
             {
                 Stopwatch timer = Stopwatch.StartNew();

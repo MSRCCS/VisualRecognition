@@ -46,6 +46,7 @@
     <Compile Include="Distance.cs" />
     <Compile Include="CelebSelection.cs" />
     <Compile Include="LFW.cs" />
+    <Compile Include="ParseResult.cs" />
     <Compile Include="VisualGenome.cs" />
     <Compile Include="NGram.cs" />
     <Compile Include="Program.cs" />
