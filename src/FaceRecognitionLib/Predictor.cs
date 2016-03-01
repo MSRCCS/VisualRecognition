@@ -30,11 +30,53 @@ namespace CEERecognition
         public Celebrity[] RecogizedAs;
     }
 
+    public class FaceDetector
+    {
+        readonly protected FaceDetectionJDA _faceDetector;
+        readonly FaceProcess _faceProcessor = new FaceProcess();
+
+        public FaceDetector(string faceModelFile)
+        {
+            _faceDetector = new FaceDetectionJDA(new Model(faceModelFile));
+
+            // Init face processor
+            _faceProcessor.LoadAlignmentTemplate();
+        }
+
+        public void DetectAndCropFaces(Bitmap bmp, out FaceRectLandmarks[] faceDetectionResult, out List<Bitmap> croppedFaces)
+        {
+            // 1. face detection
+            int imgWidth = bmp.Width;
+            int imgHeight = bmp.Height;
+            faceDetectionResult = _faceDetector.DetectAndAlign(ImageUtility.LoadImageFromBitmapAsGray(bmp));
+
+            // 2. face recognition
+            croppedFaces = new List<Bitmap>();
+            foreach (var fd in faceDetectionResult)
+            {
+                // get the face alignment result
+                float[] landPoints = new float[fd.Landmarks.Points.Length * 2];
+                for (int j = 0; j < fd.Landmarks.Points.Length; j++)
+                {
+                    landPoints[j * 2] = fd.Landmarks.Points[j].X / imgWidth;
+                    landPoints[j * 2 + 1] = fd.Landmarks.Points[j].Y / imgHeight;
+                }
+                byte[] facialPoints = new byte[54 * 4];
+                Buffer.BlockCopy(landPoints, 0, facialPoints, 0, facialPoints.Length);
+
+                // crop
+                var alignedCroppedFaceImage = _faceProcessor.faceAlignedCropping(bmp, facialPoints);
+
+                croppedFaces.Add(alignedCroppedFaceImage);
+            }
+        }
+
+    }
+
     public class CelebrityPredictor
     {
-        protected FaceDetectionJDA _faceDetector;
+        FaceDetector _faceDetector;
         protected CaffeModel _celebModel;
-        protected FaceProcess _faceProcessor = new FaceProcess();
 
         protected string[] _labelMap = null;
         protected Dictionary<string, Tuple<string, string>> _entityInfo = null;
@@ -48,11 +90,8 @@ namespace CEERecognition
                          int gpu)
         {
             // Init face detection
-            _faceDetector = new FaceDetectionJDA(new Model(faceModelFile));
+            _faceDetector = new FaceDetector(faceModelFile);
             Console.WriteLine("Succeed: Load Face Detector!\n");
-
-            // Init face processor
-            _faceProcessor.LoadAlignmentTemplate();
 
             // Init face recognition
             CaffeModel.SetDevice(gpu);
@@ -92,30 +131,7 @@ namespace CEERecognition
 
         public void DetectAndCropFaces(Bitmap bmp, out FaceRectLandmarks[] faceDetectionResult, out List<Bitmap> croppedFaces)
         {
-            // 1. face detection
-            int imgWidth = bmp.Width;
-            int imgHeight = bmp.Height;
-            faceDetectionResult = _faceDetector.DetectAndAlign(ImageUtility.LoadImageFromBitmapAsGray(bmp));
-
-            // 2. face recognition
-            croppedFaces = new List<Bitmap>();
-            foreach (var fd in faceDetectionResult)
-            {
-                // get the face alignment result
-                float[] landPoints = new float[fd.Landmarks.Points.Length * 2];
-                for (int j = 0; j < fd.Landmarks.Points.Length; j++)
-                {
-                    landPoints[j * 2] = fd.Landmarks.Points[j].X / imgWidth;
-                    landPoints[j * 2 + 1] = fd.Landmarks.Points[j].Y / imgHeight;
-                }
-                byte[] facialPoints = new byte[54 * 4];
-                Buffer.BlockCopy(landPoints, 0, facialPoints, 0, facialPoints.Length);
-
-                // crop
-                var alignedCroppedFaceImage = _faceProcessor.faceAlignedCropping(bmp, facialPoints);
-
-                croppedFaces.Add(alignedCroppedFaceImage);
-            }
+            _faceDetector.DetectAndCropFaces(bmp, out faceDetectionResult, out croppedFaces);
         }
 
         public float[] ExtractFeature(Bitmap bmp, string blobName)
@@ -147,15 +163,12 @@ namespace CEERecognition
         {
             FaceRectLandmarks[] fdResult;
             List<Bitmap> croppedFaces;
-            DetectAndCropFaces(image, out fdResult, out croppedFaces);
+            _faceDetector.DetectAndCropFaces(image, out fdResult, out croppedFaces);
 
             CelebrityRecognitionResult[] recogResult = fdResult.Select((face, idx) =>
             {
-                // resize
-                var alignedCroppedFaceImageResized = _faceProcessor.ImageResize(croppedFaces[idx], 256, 256);
-
                 // extract feature
-                float[] feature = _celebModel.ExtractOutputs(new Bitmap[]{alignedCroppedFaceImageResized}, "fc6");
+                float[] feature = _celebModel.ExtractOutputs(new Bitmap[]{croppedFaces[idx]}, "fc6");
 
                 var celebResult = new CelebrityRecognitionResult();
                 celebResult.Rect = new CelebrityRecognitionResult.Rectangle() { X = face.FaceRect.Left, Y = face.FaceRect.Top, Width = face.FaceRect.Width, Height = face.FaceRect.Height };
@@ -183,15 +196,12 @@ namespace CEERecognition
         {
             FaceRectLandmarks[] fdResult;
             List<Bitmap> croppedFaces;
-            DetectAndCropFaces(image, out fdResult, out croppedFaces);
+            _faceDetector.DetectAndCropFaces(image, out fdResult, out croppedFaces);
 
             CelebrityRecognitionResult[] recogResult = fdResult.Select((face, idx) =>
             {
-                // resize
-                var alignedCroppedFaceImageResized = _faceProcessor.ImageResize(croppedFaces[idx], 256, 256);
-
                 // recognize
-                float[] probs = _celebModel.ExtractOutputs(new Bitmap[]{alignedCroppedFaceImageResized}, "prob");
+                float[] probs = _celebModel.ExtractOutputs(new Bitmap[]{croppedFaces[idx]}, "prob");
 
                 var celebResult = new CelebrityRecognitionResult
                 {
