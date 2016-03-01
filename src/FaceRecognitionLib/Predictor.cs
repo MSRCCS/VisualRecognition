@@ -43,7 +43,7 @@ namespace CEERecognition
 
         // for Knn search, label map file and entity info file are not needed
         public void Init(string faceModelFile,
-                         string recogProtoFile, string recogModelFile, string recogLabelMapFile,
+                         string recogProtoFile, string recogModelFile, string recogMeanFile, string recogLabelMapFile,
                          string entityInfoFile,
                          int gpu)
         {
@@ -55,14 +55,9 @@ namespace CEERecognition
             _faceProcessor.LoadAlignmentTemplate();
 
             // Init face recognition
-            string protoFile = Path.GetFullPath(recogProtoFile);
-            string modelFile = Path.GetFullPath(recogModelFile);
-            string labelMapFile = Path.GetFullPath(recogLabelMapFile);
-            string curDir = Directory.GetCurrentDirectory();
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(recogProtoFile));
             CaffeModel.SetDevice(gpu);
-            _celebModel = new CaffeModel(protoFile, modelFile);
-            Directory.SetCurrentDirectory(curDir);
+            _celebModel = new CaffeModel(recogProtoFile, recogModelFile);
+            _celebModel.SetMeanFile(recogMeanFile);
             Console.WriteLine("Succeed: Load Model File!\n");
 
             // Get label map
@@ -75,7 +70,7 @@ namespace CEERecognition
             if (!string.IsNullOrEmpty(entityInfoFile))
                 _entityInfo = File.ReadAllLines(entityInfoFile)
                     .Select(line => line.Split('\t'))
-                    .ToDictionary(f => f[1], f => new Tuple<string, string>(f[2], f[3]), StringComparer.OrdinalIgnoreCase);
+                    .ToDictionary(f => f[0], f => new Tuple<string, string>(f[1], f[2]), StringComparer.OrdinalIgnoreCase);
         }
 
         public void InitKnn(string knnModelFile, int colName, int colMUrl, int colFeature)
@@ -125,12 +120,12 @@ namespace CEERecognition
 
         public float[] ExtractFeature(Bitmap bmp, string blobName)
         {
-            return _celebModel.ExtractOutputs(bmp, blobName);
+            return _celebModel.ExtractOutputs(new Bitmap[]{bmp}, blobName);
         }
 
         public float[][] ExtractFeature(Bitmap bmp, string[] blobNames)
         {
-            return _celebModel.ExtractOutputs(bmp, blobNames);
+            return _celebModel.ExtractOutputs(new Bitmap[]{bmp}, blobNames);
         }
 
         public Tuple<string, float, int>[] SearchKnn(float[] feature, int topK, float minConfidence)
@@ -160,7 +155,7 @@ namespace CEERecognition
                 var alignedCroppedFaceImageResized = _faceProcessor.ImageResize(croppedFaces[idx], 256, 256);
 
                 // extract feature
-                float[] feature = _celebModel.ExtractOutputs(alignedCroppedFaceImageResized, "fc6");
+                float[] feature = _celebModel.ExtractOutputs(new Bitmap[]{alignedCroppedFaceImageResized}, "fc6");
 
                 var celebResult = new CelebrityRecognitionResult();
                 celebResult.Rect = new CelebrityRecognitionResult.Rectangle() { X = face.FaceRect.Left, Y = face.FaceRect.Top, Width = face.FaceRect.Width, Height = face.FaceRect.Height };
@@ -196,7 +191,7 @@ namespace CEERecognition
                 var alignedCroppedFaceImageResized = _faceProcessor.ImageResize(croppedFaces[idx], 256, 256);
 
                 // recognize
-                float[] probs = _celebModel.ExtractOutputs(alignedCroppedFaceImageResized, "prob");
+                float[] probs = _celebModel.ExtractOutputs(new Bitmap[]{alignedCroppedFaceImageResized}, "prob");
 
                 var celebResult = new CelebrityRecognitionResult
                 {
@@ -212,8 +207,9 @@ namespace CEERecognition
 
                 // get model top K
                 var topKResult = probs.Select((score, k) => new KeyValuePair<int, float>(k, score))
+                                    .Where(kv => kv.Value > dnnMinConfidence)
                                     .OrderByDescending(kv => kv.Value)
-                                    .Take(dnnTopK).Where(kv => kv.Value > dnnMinConfidence);
+                                    .Take(dnnTopK);
                 // outout
                 celebResult.RecogizedAs = topKResult.Select(kv =>
                 {

@@ -53,9 +53,10 @@ namespace CEERecognition
             // Its format is as follows:
             //      proto: protofile.prototxt
             //      model: modelfile.caffemodel
+            //      mean: imagemean.binaryproto
             //      labelmap: train.labelmap
             //      entityinfo: EntityInfo.tsv
-            [Argument(ArgumentType.AtMostOnce, HelpText = "Model folder that contains model.cfg file")]
+            [Argument(ArgumentType.Required, HelpText = "Model folder that contains model.cfg file")]
             public string modelDir = ".";
             [Argument(ArgumentType.AtMostOnce, HelpText = "Gpu Id (default: 0, -1 for cpu)")]
             public int gpu = 0;
@@ -140,7 +141,8 @@ namespace CEERecognition
 
             string protoFile = Path.Combine(cmd.modelDir, modelDict["proto"]);
             string modelFile = Path.Combine(cmd.modelDir, modelDict["model"]);
-            string mapfile = Path.Combine(cmd.modelDir, modelDict["labelmap"]);
+            string labelmapFile = Path.Combine(cmd.modelDir, modelDict["labelmap"]);
+            string meanFile = Path.Combine(cmd.modelDir, modelDict["mean"]);
             string sidMapping = null;
             if (modelDict.ContainsKey("entityinfo") && !string.IsNullOrEmpty(modelDict["entityinfo"]))
                 sidMapping = Path.Combine(cmd.modelDir, modelDict["entityinfo"]);
@@ -149,7 +151,7 @@ namespace CEERecognition
             System.Diagnostics.Debug.Assert(File.Exists(protoFile));
 
             CelebrityPredictor predictor = new CelebrityPredictor();
-            predictor.Init(faceModelFile, protoFile, modelFile, mapfile, sidMapping, cmd.gpu);
+            predictor.Init(faceModelFile, protoFile, modelFile, meanFile, labelmapFile, sidMapping, cmd.gpu);
 
             return predictor;
         }
@@ -172,7 +174,7 @@ namespace CEERecognition
                 using (var ms = new MemoryStream(imageStream))
                 using (var bmp = new Bitmap(ms))
                 {
-                    var recogResult = predictor.Predict(bmp, 20, 0.9f);
+                    var recogResult = predictor.Predict(bmp, 20, cmd.conf);
 
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine("==== Image: {0} ====", img);
