@@ -401,30 +401,6 @@ namespace CEERecognition
             return croppedImage;
         }
 
-        public Bitmap ImageResize(Bitmap img, int outputWidth, int outputHeight)
-        {
-            System.Drawing.Imaging.PixelFormat pf = default(System.Drawing.Imaging.PixelFormat);
-            //if (bkColor == Color.Transparent)
-            //{
-            pf = System.Drawing.Imaging.PixelFormat.Format32bppArgb;
-            //}
-            //else
-            // {
-            //     pf = bmp.PixelFormat;
-            // }
-
-            Bitmap newImg = new Bitmap((int)outputWidth, (int)outputHeight, pf);
-            Graphics g = Graphics.FromImage(newImg);
-            g.Clear(Color.Transparent);
-
-            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBilinear;
-            //g.DrawImageUnscaled(bmp, 0, 0); // draw the image at 0, 0
-            g.DrawImage(img, 0, 0, outputWidth, outputHeight); // draw the image at 0, 0
-            g.Dispose();
-
-            return newImg;
-        }
-
         public byte[] facialPointsDrawing(byte[] inputImage, byte[] facialPoints_b)
         {
             float[] facialPoints = Helper.BinaryToFloatArray(facialPoints_b);

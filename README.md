@@ -13,6 +13,6 @@ This project is for research in visual recognition to experiment for data gather
 ## Repository Setup
 Run the following line in Powershell
 
-    git clone --recursive git@github.com:MSRCCS/VisualRecognition.git ; git clone git@github.com:leizhang/wincaffe-3rdparty.git VisualRecognition/caffe/3rdparty
+    git clone --recursive git@github.com:MSRCCS/VisualRecognition.git ; git clone git@github.com:leizhangcn/wincaffe-3rdparty.git VisualRecognition/caffe/3rdparty
     
 Then you should be able to build `VisualRecognition.sln` using Visual Studio.

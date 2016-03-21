@@ -30,69 +30,17 @@ namespace CEERecognition
         public Celebrity[] RecogizedAs;
     }
 
-    public class CelebrityPredictor
+    public class FaceDetector
     {
-        protected FaceDetectionJDA _faceDetector;
-        protected CaffeModel _celebModel;
-        protected FaceProcess _faceProcessor = new FaceProcess();
+        readonly protected FaceDetectionJDA _faceDetector;
+        readonly FaceProcess _faceProcessor = new FaceProcess();
 
-        protected string[] _labelMap = null;
-        protected Dictionary<string, Tuple<string, string>> _entityInfo = null;
-
-        Tuple<string, string, float[]>[] _knnModel = null;
-
-        // for Knn search, label map file and entity info file are not needed
-        public void Init(string faceModelFile,
-                         string recogProtoFile, string recogModelFile, string recogLabelMapFile,
-                         string entityInfoFile,
-                         int gpu)
+        public FaceDetector(string faceModelFile)
         {
-            // Init face detection
             _faceDetector = new FaceDetectionJDA(new Model(faceModelFile));
-            Console.WriteLine("Succeed: Load Face Detector!\n");
 
             // Init face processor
             _faceProcessor.LoadAlignmentTemplate();
-
-            // Init face recognition
-            string protoFile = Path.GetFullPath(recogProtoFile);
-            string modelFile = Path.GetFullPath(recogModelFile);
-            string labelMapFile = Path.GetFullPath(recogLabelMapFile);
-            string curDir = Directory.GetCurrentDirectory();
-            Directory.SetCurrentDirectory(Path.GetDirectoryName(recogProtoFile));
-            CaffeModel.SetDevice(gpu);
-            _celebModel = new CaffeModel(protoFile, modelFile);
-            Directory.SetCurrentDirectory(curDir);
-            Console.WriteLine("Succeed: Load Model File!\n");
-
-            // Get label map
-            if (!string.IsNullOrEmpty(recogLabelMapFile))
-                _labelMap = File.ReadAllLines(recogLabelMapFile)
-                    .Select(line => line.Split('\t')[0])
-                    .ToArray();
-
-            // Load entity info file
-            if (!string.IsNullOrEmpty(entityInfoFile))
-                _entityInfo = File.ReadAllLines(entityInfoFile)
-                    .Select(line => line.Split('\t'))
-                    .ToDictionary(f => f[1], f => new Tuple<string, string>(f[2], f[3]), StringComparer.OrdinalIgnoreCase);
-        }
-
-        public void InitKnn(string knnModelFile, int colName, int colMUrl, int colFeature)
-        {
-            _knnModel = File.ReadLines(knnModelFile)
-                .Select(line =>
-                {
-                    var cols = line.Split('\t');
-                    byte[] fea = Convert.FromBase64String(cols[colFeature]);
-                    float[] feature = new float[fea.Length / sizeof(float)];
-                    Buffer.BlockCopy(fea, 0, feature, 0, fea.Length);
-                    Distance.Normalize(ref feature);
-                    return new Tuple<string, string, float[]>(cols[colName], cols[colMUrl], feature);
-                })
-                .ToArray();
-            int numPeople = _knnModel.Select(x => x.Item1).Distinct().Count();
-            Console.WriteLine("KNN model loaded: {0} people and {1} faces", numPeople, _knnModel.Count());
         }
 
         public void DetectAndCropFaces(Bitmap bmp, out FaceRectLandmarks[] faceDetectionResult, out List<Bitmap> croppedFaces)
@@ -123,14 +71,77 @@ namespace CEERecognition
             }
         }
 
+    }
+
+    public class CelebrityPredictor
+    {
+        FaceDetector _faceDetector;
+        protected CaffeModel _celebModel;
+
+        protected string[] _labelMap = null;
+        protected Dictionary<string, Tuple<string, string>> _entityInfo = null;
+
+        Tuple<string, string, float[]>[] _knnModel = null;
+
+        // for Knn search, label map file and entity info file are not needed
+        public void Init(string faceModelFile,
+                         string recogProtoFile, string recogModelFile, string recogMeanFile, string recogLabelMapFile,
+                         string entityInfoFile,
+                         int gpu)
+        {
+            // Init face detection
+            _faceDetector = new FaceDetector(faceModelFile);
+            Console.WriteLine("Succeed: Load Face Detector!\n");
+
+            // Init face recognition
+            CaffeModel.SetDevice(gpu);
+            _celebModel = new CaffeModel(recogProtoFile, recogModelFile);
+            _celebModel.SetMeanFile(recogMeanFile);
+            Console.WriteLine("Succeed: Load Model File!\n");
+
+            // Get label map
+            if (!string.IsNullOrEmpty(recogLabelMapFile))
+                _labelMap = File.ReadAllLines(recogLabelMapFile)
+                    .Select(line => line.Split('\t')[0])
+                    .ToArray();
+
+            // Load entity info file
+            if (!string.IsNullOrEmpty(entityInfoFile))
+                _entityInfo = File.ReadAllLines(entityInfoFile)
+                    .Select(line => line.Split('\t'))
+                    .ToDictionary(f => f[0], f => new Tuple<string, string>(f[1], f[2]), StringComparer.OrdinalIgnoreCase);
+        }
+
+        public void InitKnn(string knnModelFile, int colName, int colMUrl, int colFeature)
+        {
+            _knnModel = File.ReadLines(knnModelFile)
+                .Select(line =>
+                {
+                    var cols = line.Split('\t');
+                    byte[] fea = Convert.FromBase64String(cols[colFeature]);
+                    float[] feature = new float[fea.Length / sizeof(float)];
+                    Buffer.BlockCopy(fea, 0, feature, 0, fea.Length);
+                    Distance.Normalize(ref feature);
+                    return new Tuple<string, string, float[]>(cols[colName], cols[colMUrl], feature);
+                })
+                .ToArray();
+            int numPeople = _knnModel.Select(x => x.Item1).Distinct().Count();
+            Console.WriteLine("KNN model loaded: {0} people and {1} faces", numPeople, _knnModel.Count());
+        }
+
+        public void DetectAndCropFaces(Bitmap bmp, out FaceRectLandmarks[] faceDetectionResult, out List<Bitmap> croppedFaces)
+        {
+            _faceDetector.DetectAndCropFaces(bmp, out faceDetectionResult, out croppedFaces);
+        }
+
         public float[] ExtractFeature(Bitmap bmp, string blobName)
         {
-            return _celebModel.ExtractOutputs(bmp, blobName);
+            return _celebModel.ExtractOutputs(new Bitmap[]{bmp}, blobName);
         }
 
         public float[][] ExtractFeature(Bitmap bmp, string[] blobNames)
         {
-            return _celebModel.ExtractOutputs(bmp, blobNames);
+            return _celebModel.ExtractOutputs(new Bitmap[]{bmp}, blobNames);
         }
 
         public Tuple<string, float, int>[] SearchKnn(float[] feature, int topK, float minConfidence)
@@ -152,15 +163,12 @@ namespace CEERecognition
         {
             FaceRectLandmarks[] fdResult;
             List<Bitmap> croppedFaces;
-            DetectAndCropFaces(image, out fdResult, out croppedFaces);
+            _faceDetector.DetectAndCropFaces(image, out fdResult, out croppedFaces);
 
             CelebrityRecognitionResult[] recogResult = fdResult.Select((face, idx) =>
             {
-                // resize
-                var alignedCroppedFaceImageResized = _faceProcessor.ImageResize(croppedFaces[idx], 256, 256);
-
                 // extract feature
-                float[] feature = _celebModel.ExtractOutputs(alignedCroppedFaceImageResized, "fc6");
+                float[] feature = _celebModel.ExtractOutputs(new Bitmap[]{croppedFaces[idx]}, "fc6");
 
                 var celebResult = new CelebrityRecognitionResult();
                 celebResult.Rect = new CelebrityRecognitionResult.Rectangle() { X = face.FaceRect.Left, Y = face.FaceRect.Top, Width = face.FaceRect.Width, Height = face.FaceRect.Height };
@@ -188,15 +196,12 @@ namespace CEERecognition
         {
             FaceRectLandmarks[] fdResult;
             List<Bitmap> croppedFaces;
-            DetectAndCropFaces(image, out fdResult, out croppedFaces);
+            _faceDetector.DetectAndCropFaces(image, out fdResult, out croppedFaces);
 
             CelebrityRecognitionResult[] recogResult = fdResult.Select((face, idx) =>
             {
-                // resize
-                var alignedCroppedFaceImageResized = _faceProcessor.ImageResize(croppedFaces[idx], 256, 256);
-
                 // recognize
-                float[] probs = _celebModel.ExtractOutputs(alignedCroppedFaceImageResized, "prob");
+                float[] probs = _celebModel.ExtractOutputs(new Bitmap[]{croppedFaces[idx]}, "prob");
 
                 var celebResult = new CelebrityRecognitionResult
                 {
@@ -212,8 +217,9 @@ namespace CEERecognition
 
                 // get model top K
                 var topKResult = probs.Select((score, k) => new KeyValuePair<int, float>(k, score))
+                                    .Where(kv => kv.Value > dnnMinConfidence)
                                     .OrderByDescending(kv => kv.Value)
-                                    .Take(dnnTopK).Where(kv => kv.Value > dnnMinConfidence);
+                                    .Take(dnnTopK);
                 // outout
                 celebResult.RecogizedAs = topKResult.Select(kv =>
                 {

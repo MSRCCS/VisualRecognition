@@ -13,39 +13,12 @@ using System.Drawing.Imaging;
 using CmdParser;
 using CEERecognition;
 using FaceSdk;
+using TsvTool.Utility;
 
 namespace CEERecognition
 {
     class Program
     {
-        static ImageCodecInfo GetEncoder(ImageFormat format)
-        {
-            ImageCodecInfo returncodec = null;
-            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
-            foreach (var codec in codecs)
-            {
-                if (codec.FormatID == format.Guid)
-                    returncodec = codec;
-            }
-            return returncodec;
-        }
-
-        // save image to jpg format
-        static string SaveImageToString(Bitmap bmp)
-        {
-            using (var jpegImageStream = new MemoryStream())
-            {
-                var jpgEncoder = GetEncoder(ImageFormat.Jpeg);
-                var myEncoder = System.Drawing.Imaging.Encoder.Quality;
-                var myEncoderParas = new EncoderParameters(1);
-                var myEncoderPara = new EncoderParameter(myEncoder, 90L);
-                myEncoderParas.Param[0] = myEncoderPara;
-
-                bmp.Save(jpegImageStream, jpgEncoder, myEncoderParas);
-                return Convert.ToBase64String(jpegImageStream.ToArray());
-            }
-        }
-
         // args for predictor initialization
         class Args
         {
@@ -53,9 +26,10 @@ namespace CEERecognition
             // Its format is as follows:
             //      proto: protofile.prototxt
             //      model: modelfile.caffemodel
+            //      mean: imagemean.binaryproto
             //      labelmap: train.labelmap
             //      entityinfo: EntityInfo.tsv
-            [Argument(ArgumentType.AtMostOnce, HelpText = "Model folder that contains model.cfg file")]
+            [Argument(ArgumentType.Required, HelpText = "Model folder that contains model.cfg file")]
             public string modelDir = ".";
             [Argument(ArgumentType.AtMostOnce, HelpText = "Gpu Id (default: 0, -1 for cpu)")]
             public int gpu = 0;
@@ -101,16 +75,6 @@ namespace CEERecognition
             public bool skipMultiFace = true;
         }
 
-        class ArgsExtractFolder : Args
-        {
-            [Argument(ArgumentType.Required, HelpText = "Input folder")]
-            public string inFolder = null;
-            [Argument(ArgumentType.Required, HelpText = "Output TSV file")]
-            public string outTsv = null;
-            [Argument(ArgumentType.AtMostOnce, HelpText = "Feature blob name")]
-            public string blob = "fc6";
-        }
-
         class ArgsLDA
         {
             [Argument(ArgumentType.Required, HelpText = "LDA model file")]
@@ -140,7 +104,8 @@ namespace CEERecognition
 
             string protoFile = Path.Combine(cmd.modelDir, modelDict["proto"]);
             string modelFile = Path.Combine(cmd.modelDir, modelDict["model"]);
-            string mapfile = Path.Combine(cmd.modelDir, modelDict["labelmap"]);
+            string labelmapFile = Path.Combine(cmd.modelDir, modelDict["labelmap"]);
+            string meanFile = Path.Combine(cmd.modelDir, modelDict["mean"]);
             string sidMapping = null;
             if (modelDict.ContainsKey("entityinfo") && !string.IsNullOrEmpty(modelDict["entityinfo"]))
                 sidMapping = Path.Combine(cmd.modelDir, modelDict["entityinfo"]);
@@ -149,7 +114,7 @@ namespace CEERecognition
             System.Diagnostics.Debug.Assert(File.Exists(protoFile));
 
             CelebrityPredictor predictor = new CelebrityPredictor();
-            predictor.Init(faceModelFile, protoFile, modelFile, mapfile, sidMapping, cmd.gpu);
+            predictor.Init(faceModelFile, protoFile, modelFile, meanFile, labelmapFile, sidMapping, cmd.gpu);
 
             return predictor;
         }
@@ -172,7 +137,7 @@ namespace CEERecognition
                 using (var ms = new MemoryStream(imageStream))
                 using (var bmp = new Bitmap(ms))
                 {
-                    var recogResult = predictor.Predict(bmp, 20, 0.9f);
+                    var recogResult = predictor.Predict(bmp, 20, cmd.conf);
 
                     Console.ForegroundColor = ConsoleColor.Yellow;
                     Console.WriteLine("==== Image: {0} ====", img);
@@ -237,138 +202,67 @@ namespace CEERecognition
             Console.WriteLine("\nLatency: {0} seconds per image", timer.Elapsed.TotalSeconds / line_count);
         }
 
-        static void ExtractFace(ArgsExtract cmd)
+        static void Extract(ArgsExtract cmd)
         {
             if (cmd.outTsv == null)
-                cmd.outTsv = Path.ChangeExtension(cmd.inTsv, ".face.tsv");
+                cmd.outTsv = Path.ChangeExtension(cmd.inTsv, ".face." + cmd.blob + ".tsv");
 
             CelebrityPredictor predictor = InitPredictor(cmd);
 
             Stopwatch timer = Stopwatch.StartNew();
 
             int count = 0;
-            var lines = File.ReadLines(cmd.inTsv);
-            using (StreamWriter sw = new StreamWriter(cmd.outTsv))
-            {
-                foreach (string line in lines)
+            var lines = File.ReadLines(cmd.inTsv)
+                .ReportProgress("Lines processed")
+                .Select(line => line.Split('\t').ToList())
+                .Select(cols => 
                 {
-                    string[] cols = line.Split('\t');
-                    string strImage = cols[cmd.imageCol];
-                    using (var ms = new MemoryStream(Convert.FromBase64String(strImage)))
+                    count++;
+                    using (var ms = new MemoryStream(Convert.FromBase64String(cols[cmd.imageCol])))
                     using (var bmp = new Bitmap(ms))
                     {
-                        
                         FaceRectLandmarks[] faces;
                         List<Bitmap> croppedFaces;
                         predictor.DetectAndCropFaces(bmp, out faces, out croppedFaces);
-
-                        if ((!cmd.skipMultiFace && faces.Length > 0) ||
-                            (cmd.skipMultiFace && faces.Length == 1))
-                        {
-                            // select the largest face
-                            var face = faces.Select((f, idx) => new KeyValuePair<int, FaceRectLandmarks>(idx, f))
-                                    .OrderByDescending(kv => kv.Value.FaceRect.Area)
-                                    .ToArray()[0];
-
-                            Bitmap img = croppedFaces[face.Key];
-                            float[] features = predictor.ExtractFeature(img, cmd.blob);
-                            byte[] fea = new byte[features.Length * sizeof(float)];
-                            Buffer.BlockCopy(features, 0, fea, 0, features.Length * sizeof(float));
-
-                            var rc = face.Value.FaceRect;
-                            sw.WriteLine("{0}\t{1},{2},{3},{4}\t{5}\t{6}", line,
-                                    rc.Left, rc.Top, rc.Width, rc.Height,
-                                    SaveImageToString(img),
-                                    Convert.ToBase64String(fea));
-                        }
+                        return new {cols = cols, faces = faces, croppedFaces = croppedFaces};
                     }
-                    Console.Write("Lines processed: {0}\r", ++count);
-                }
-            }
+                })
+                .Where(x => x.faces.Length > 0) // no face
+                .Where(x => !(cmd.skipMultiFace && x.faces.Length > 1)) // skip multiple face if needed
+                .Select(x => 
+                {
+                    // select the largest face
+                    var face = x.faces.Select(f => f.FaceRect)
+                        .Select((f, idx) => Tuple.Create(f, idx))
+                            .OrderByDescending(tp => tp.Item1.Area)
+                            .First();
+
+                    Bitmap img = x.croppedFaces[face.Item2];
+                    float[] features = predictor.ExtractFeature(img, cmd.blob);
+
+                    byte[] fea = new byte[features.Length * sizeof(float)];
+                    Buffer.BlockCopy(features, 0, fea, 0, features.Length * sizeof(float));
+
+                    x.cols.RemoveAt(cmd.imageCol);
+                    var rc = face.Item1;
+                    x.cols.Add(string.Format("{0},{1},{2},{3}", rc.Left, rc.Top, rc.Width, rc.Height));
+                    var img_buf = TsvTool.Utility.ImageUtility.SaveImageToJpegInBuffer(img);
+                    x.cols.Add(Convert.ToBase64String(img_buf));
+                    x.cols.Add(Convert.ToBase64String(fea));
+
+                    img.Dispose();
+
+                    return x.cols;
+                })
+                .Select(cols => string.Join("\t", cols));
+
+            File.WriteAllLines(cmd.outTsv, lines);
+            Console.WriteLine("\nDone.");
 
             timer.Stop();
             Console.WriteLine("Latency: {0} seconds per image", timer.Elapsed.TotalSeconds / count);
 
             Console.WriteLine("Column names: Name, MUrl, ImageStream, FaceRect, FaceImageStream, FaceFeature(4096D)");
-        }
-
-        static void Extract(ArgsExtract cmd)
-        {
-            var inData = File.ReadLines(cmd.inTsv)
-                            .Select(line => line.Split('\t'));
-
-            CelebrityPredictor predictor = InitPredictor(cmd);
-
-            Stopwatch timer = Stopwatch.StartNew();
-            int count = 0;
-            var result = inData.Select(cols =>
-                {
-                    using (var ms = new MemoryStream(Convert.FromBase64String(cols[cmd.imageCol])))
-                    using (var bmp = new Bitmap(ms))
-                    {
-                        float[] features = predictor.ExtractFeature(bmp, cmd.blob);
-                        byte[] fea = new byte[features.Length * sizeof(float)];
-                        Buffer.BlockCopy(features, 0, fea, 0, features.Length * sizeof(float));
-                        cols[cmd.imageCol] = Convert.ToBase64String(fea);
-                        Console.Write("{0}\r", ++count);
-                        return cols;
-                    }
-                })
-                .Select(cols => string.Join("\t", cols));
-
-            File.WriteAllLines(cmd.outTsv, result);
-
-            timer.Stop();
-            Console.WriteLine("Latency: {0} seconds per image", timer.Elapsed.TotalSeconds / count);
-
-            Console.WriteLine("Columns are kept the same, with just image stream replaced by feature");
-        }
-        
-        static void ExtractFaceFolder(ArgsExtractFolder cmd)
-        {
-            CelebrityPredictor predictor = InitPredictor(cmd);
-
-            var allFiles = Directory.GetFiles(cmd.inFolder, "*.*", SearchOption.AllDirectories)
-                            .Where(file => file.ToLower().EndsWith("jpg") || file.ToLower().EndsWith("bmp"))
-                            .ToArray();
-
-            Stopwatch timer = Stopwatch.StartNew();
-            int count = 0;
-            using (StreamWriter sw = new StreamWriter(cmd.outTsv))
-            {
-                foreach (string file in allFiles)
-                { 
-                    byte[] rawImage = File.ReadAllBytes(file);
-                    using (var ms = new MemoryStream(rawImage))
-                    using (var bmp = new Bitmap(ms))
-                    {
-                        FaceRectLandmarks[] faces;
-                        List<Bitmap> croppedFaces;
-                        predictor.DetectAndCropFaces(bmp, out faces, out croppedFaces);
-
-                        for (int i = 0; i < faces.Length; i++)
-                        {
-                            float[] features = predictor.ExtractFeature(croppedFaces[i], cmd.blob);
-                            byte[] fea = new byte[features.Length * sizeof(float)];
-                            Buffer.BlockCopy(features, 0, fea, 0, features.Length * sizeof(float));
-
-                            var rc = faces[i].FaceRect;
-                            sw.WriteLine("{0}\t{1},{2},{3},{4}\t{5}\t{6}", file.Substring(cmd.inFolder.Length + 1),
-                                    rc.Left, rc.Top, rc.Width, rc.Height,
-                                    SaveImageToString(croppedFaces[i]),
-                                    Convert.ToBase64String(fea));
-                        }
-                    }
-
-                    count++;
-                    Console.WriteLine("Processed {0} out of {1} images", count, allFiles.Length);
-                }
-            }
-
-            timer.Stop();
-            Console.WriteLine("Latency: {0} seconds per image", timer.Elapsed.TotalSeconds / count);
-
-            Console.WriteLine("Column names: FileName, FaceRect, FaceImageStream, FaceFeature(4096D)");
         }
 
         static void Lda(ArgsLDA cmd)
@@ -397,13 +291,97 @@ namespace CEERecognition
             Console.WriteLine("Done!");
         }
 
+        class ArgsCropFace
+        {
+            [Argument(ArgumentType.Required, HelpText = "Input TSV file")]
+            public string inTsv = null;
+            [Argument(ArgumentType.Required, HelpText = "Column index for image stream")]
+            public int imageCol = -1;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Output TSV file (default: replace file .ext with .face.tsv")]
+            public string outTsv = null;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Max image size for cropped face (default: 0 for no resize)")]
+            public int maxSize = 0;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Skip multiple face image (default: yes)")]
+            public bool skipMultiFace = true;
+        }
+
+        static void CropFace(ArgsCropFace cmd)
+        {
+            if (cmd.outTsv == null)
+                cmd.outTsv = Path.ChangeExtension(cmd.inTsv, ".face.tsv");
+
+            string exeDir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            string faceModelFile = Path.Combine(exeDir, "ProductCascadeJDA27ptsWithLbf.mdl");
+            FaceDetector faceDetector = new FaceDetector(faceModelFile);
+
+            Stopwatch timer = Stopwatch.StartNew();
+
+            var lines = File.ReadLines(cmd.inTsv)
+                .ReportProgress("Lines processed")
+                .AsParallel().AsOrdered()
+                .Select(line => line.Split('\t').ToList())
+                .Select(cols =>
+                {
+                    // detect face
+                    using (var ms = new MemoryStream(Convert.FromBase64String(cols[cmd.imageCol])))
+                    using (var bmp = new Bitmap(ms))
+                    {
+                        FaceRectLandmarks[] faces;
+                        List<Bitmap> croppedFaces;
+                        faceDetector.DetectAndCropFaces(bmp, out faces, out croppedFaces);
+                        croppedFaces = croppedFaces.Select(img =>
+                            {
+                                // resize if needed
+                                if (cmd.maxSize > 0)
+                                {
+                                    var resized_img = TsvTool.Utility.ImageUtility.DownsizeImage(img, cmd.maxSize);
+                                    if (!Object.ReferenceEquals(resized_img, img))
+                                        img.Dispose();
+                                    img = resized_img;
+                                }
+                                return img;
+                            })
+                            .ToList();
+
+                        cols.RemoveAt(cmd.imageCol);
+                        return new { cols = cols, faces = faces, croppedFaces = croppedFaces };
+                    }
+                })
+                .Where(x => x.faces.Length > 0)
+                .Where(x => !(cmd.skipMultiFace && x.faces.Length > 1))
+                .SelectMany(x =>
+                {
+                    var face_lines = x.faces.Select(f => f.FaceRect)
+                        .Select((f, idx) =>
+                        {
+                            var image_buffer = TsvTool.Utility.ImageUtility.SaveImageToJpegInBuffer(x.croppedFaces[idx]);
+                            x.croppedFaces[idx].Dispose();
+
+                            // generate result
+                            var append = new string[] 
+                            {
+                                "Face_Id" + idx,
+                                string.Format("{0},{1},{2},{3}", f.Left, f.Top, f.Width, f.Height),
+                                Convert.ToBase64String(image_buffer)
+                            };
+
+                            return string.Join("\t", x.cols) + "\t" + string.Join("\t", append);
+                        });
+                    return face_lines;
+                });
+
+            File.WriteAllLines(cmd.outTsv, lines);
+            Console.WriteLine("\nDone.");
+
+            Console.WriteLine("OutTsv format: OriginalLine with ImageStream Removed, FaceId, FaceRect, FaceImageStream");
+        }
+
         static void Main(string[] args)
         {
             ParserX.AddTask<ArgsTest>(Test, "Test celebrity recognition from image folder or image files");
             ParserX.AddTask<ArgsTestTsv>(TestTsv, "Test celebrity recognition from TSV file");
-            ParserX.AddTask<ArgsExtract>(ExtractFace, "Extract face feature from TSV file");
-            ParserX.AddTask<ArgsExtract>(Extract, "Extract caffe feature from TSV file");
-            ParserX.AddTask<ArgsExtractFolder>(ExtractFaceFolder, "Extract face feature from folder");
+            ParserX.AddTask<ArgsExtract>(Extract, "Extract face feature from TSV file");
+            ParserX.AddTask<ArgsCropFace>(CropFace, "Detect and crop face from TSV file");
             ParserX.AddTask<ArgsLDA>(Lda, "Apply LDA transformation");
             if (ParserX.ParseArgumentsWithUsage(args))
             {

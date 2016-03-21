@@ -95,6 +95,7 @@ packages/
 */bin/
 */obj/
 */ipch/
+*.user
 
 # CUDA
 *.deps
