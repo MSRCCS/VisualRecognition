@@ -109,7 +109,7 @@ namespace CEERecognition
             if (!string.IsNullOrEmpty(entityInfoFile))
                 _entityInfo = File.ReadAllLines(entityInfoFile)
                     .Select(line => line.Split('\t'))
-                    .ToDictionary(f => f[0], f => new Tuple<string, string>(f[1], f[2]), StringComparer.OrdinalIgnoreCase);
+                    .ToDictionary(f => f[0], f => new Tuple<string, string>(f[1], f.Length > 2 ? f[2] : null), StringComparer.OrdinalIgnoreCase);
         }
 
         public void InitKnn(string knnModelFile, int colName, int colMUrl, int colFeature)
