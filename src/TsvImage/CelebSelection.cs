@@ -389,18 +389,22 @@ namespace TsvImage
                 {
                     string ground_true = g.Key;
                     var wrong = g.AsEnumerable()
+                        .Where(tp => !string.IsNullOrEmpty(tp.Item2))
                         .Select(tp => tp.Item2.Split(';'))
                         .Where(cols => cols.Length > 0)
                         .Select(cols => cols[0].Split(':'))
                         .Select(pred => new { cls = pred[0], conf = Convert.ToSingle(pred[1]) })
                         .Where(pred => pred.conf > cmd.conf && string.CompareOrdinal(pred.cls, ground_true) != 0)
-                        .Select(pred => pred.cls + ":" + pred.conf);
-
-                    return Tuple.Create(g.Key, g.Count(), wrong.Count(), string.Join(";", wrong));
+                        .GroupBy(pred => pred.cls)
+                        .Select(g_pred => new { cls = g_pred.Key, num = g_pred.Count()})
+                        .OrderByDescending(x => x.num)
+                        .ToArray();
+                    int num_wrong = wrong.Sum(x => x.num);
+                    return Tuple.Create(g.Key, (float)num_wrong / g.Count(), g.Count(), num_wrong, string.Join(";", wrong.Select(x => x.cls + ":" + x.num)));
                 })
-                .Where(tp => tp.Item3 > 0)
-                .OrderByDescending(tp => tp.Item3)
-                .Select(tp => tp.Item1 + "\t" + tp.Item2 + "\t" + tp.Item3 + "\t" + tp.Item4);
+                .Where(tp => tp.Item4 > 0)
+                .OrderByDescending(tp => tp.Item2)
+                .Select(tp => tp.Item1 + "\t" + tp.Item2 + "\t" + tp.Item3 + "\t" + tp.Item4 + "\t" + tp.Item5);
 
             File.WriteAllLines(cmd.outTsv, lines);
             Console.WriteLine("Done.");
