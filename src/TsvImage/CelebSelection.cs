@@ -364,7 +364,7 @@ namespace TsvImage
         {
             [Argument(ArgumentType.Required, HelpText = "Input TSV file")]
             public string inTsv = null;
-            [Argument(ArgumentType.AtMostOnce, HelpText = "Output TSV file (default: replace InTsv .ext with .wrong.tsv)")]
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Output TSV file (default: replace InTsv .ext with .wrong.stat.tsv)")]
             public string outTsv = null;
             [Argument(ArgumentType.Required, HelpText = "Column index for label")]
             public int label = -1;
@@ -377,12 +377,34 @@ namespace TsvImage
         static void WrongCeleb(ArgsWrongCeleb cmd)
         {
             if (cmd.outTsv == null)
-                cmd.outTsv = Path.ChangeExtension(cmd.inTsv, ".wrong.tsv");
+                cmd.outTsv = Path.ChangeExtension(cmd.inTsv, ".wrong.stat.tsv");
 
-            var lines = File.ReadLines(cmd.inTsv)
+            var predictions = File.ReadLines(cmd.inTsv)
                 .ReportProgress("Lines processed")
                 .Select(line => line.Split('\t'))
                 .Select(cols => Tuple.Create(cols[cmd.label], cols[cmd.predict]))
+                .ToArray();
+
+            var wrongs = predictions
+                .Select(tp =>
+                {
+                    string ground_true = tp.Item1;
+                    string wrong = "Unknown";
+                    var predicts = tp.Item2.Split(';');
+                    if (!string.IsNullOrEmpty(tp.Item2) && predicts.Length > 0)
+                    {
+                        var pred = predicts.First().Split(':');
+                        float conf = Convert.ToSingle(pred[1]);
+                        if (conf > cmd.conf && string.CompareOrdinal(pred[0], ground_true) != 0)
+                            wrong = predicts.First();
+                    }
+                    return wrong; 
+                });
+
+            File.WriteAllLines(Path.ChangeExtension(cmd.inTsv, ".wrong.tsv"), wrongs);
+            Console.WriteLine("\nDetailed result saved.");
+
+            var lines = predictions
                 .GroupBy(tp => tp.Item1)
                 .ReportProgress("Group processed")
                 .Select(g =>
