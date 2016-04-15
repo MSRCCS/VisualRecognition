@@ -40,7 +40,7 @@ namespace ImageAcquisition
         static async Task<string> DownloadBingResultPage(string query, int depth)
         {
             string result = string.Empty;
-            string queryUrl = String.Format(queryUrlTemplate, query.Replace(' ', '+'), depth);
+            string queryUrl = String.Format(queryUrlTemplate, System.Net.WebUtility.UrlEncode(query), depth);
             using (WebClient wc = new WebClient())
             {
                 bool retry = true;
