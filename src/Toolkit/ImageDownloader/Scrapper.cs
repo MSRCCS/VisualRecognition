@@ -37,10 +37,13 @@ namespace ImageAcquisition
         }
 
         static string queryUrlTemplate = @"http://www.bing.com/images/search?q={0}&form=MONITR&qs=n&format=pbxml&first=0&count={1}&fdpriority=premium&mkt=en-us"; //default
+        // http://www.bing.com/images/search?q=giuseppe+zanotti+&qft=+filterui:face-portrait&FORM=R5IR33
         static async Task<string> DownloadBingResultPage(string query, int depth)
         {
             string result = string.Empty;
-            string queryUrl = String.Format(queryUrlTemplate, System.Net.WebUtility.UrlEncode(query), depth);
+            var query_fields = query.Split(new string[] { "&&" }, StringSplitOptions.RemoveEmptyEntries);
+            query_fields[0] = System.Net.WebUtility.UrlEncode(query_fields[0]);
+            string queryUrl = String.Format(queryUrlTemplate, string.Join("&", query_fields), depth);
             using (WebClient wc = new WebClient())
             {
                 bool retry = true;
