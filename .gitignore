@@ -1,6 +1,9 @@
 ## General
 env/z*
 
+# Project
+*.sdf
+
 # Compiled Object files
 *.slo
 *.lo
@@ -24,7 +27,7 @@ env/z*
 # Compiled python
 *.pyc
 
-# Compiled MATLAB
+# vim .gitignoreCompiled MATLAB
 *.mex*
 
 # build, distribute, and bins
