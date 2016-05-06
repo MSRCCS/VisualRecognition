@@ -116,8 +116,8 @@ namespace TsvImage
             public int feature = -1;
             [Argument(ArgumentType.Required, HelpText = "Column index for label")]
             public int label = -1;
-            [Argument(ArgumentType.AtMostOnce, HelpText = "Outlier threshold (default: 0.9)")]
-            public float thresh = 0.9f;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Outlier threshold (default: 0.75)")]
+            public float thresh = 0.75f;
         }
 
         static float[] CalcMean<T>(IEnumerable<T> source, Func<T, float[]> func)
@@ -181,12 +181,12 @@ namespace TsvImage
                         .Select(x => 
                         {
                             var dis = (float)Math.Sqrt(Distance.L2Distance(mean20_cleaned, x.f));
-                            return x.c + "\t" + var20_cleaned + "\t" + dis + "\t" + (dis < cmd.thresh);
+                            return var20_cleaned + "\t" + dis + "\t" + (dis < cmd.thresh);
                         })
                         .ToArray();
 
                     return new {key = g.Key, var20_cleaned = var20_cleaned, n_top20_cleaned = top20_cleaned.Count(), 
-                                var_all = var_all, total = g.Count(), dis_array = dist_array};
+                                var_all = var_all, total = g.Count(), dist_array = dist_array};
                 })
                 .ToList();
 
@@ -194,20 +194,20 @@ namespace TsvImage
                     .Select(x => x.key + "\t" + x.var20_cleaned + "\t" + x.n_top20_cleaned 
                         + "\t" + x.var_all + "\t" + x.total));
 
-            var lines = variances.SelectMany(x => x.dis_array);
+            var lines = variances.SelectMany(x => x.dist_array);
             File.WriteAllLines(Path.ChangeExtension(cmd.inTsv, ".score.tsv"), lines);
 
-            Console.WriteLine("Done.");
+            Console.WriteLine("\nDone.");
         }
 
         class ArgsViewCheck
         {
             [Argument(ArgumentType.Required, HelpText = "Input INI file for the view of data repo")]
             public string ini = null;
-            [Argument(ArgumentType.AtMostOnce, HelpText = "Max positive data per class (default: 500)")]
-            public int maxPos = 500;
-            [Argument(ArgumentType.AtMostOnce, HelpText = "Min positive data per class (default: 10)")]
-            public int minPos = 10;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Max data per class (default: 500)")]
+            public int max = 500;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Min data per class (default: 0)")]
+            public int min = 0;
         }
 
         static Dictionary<string, int> SelectSid(ArgsViewCheck cmd)
@@ -217,6 +217,16 @@ namespace TsvImage
 
             Dictionary<string, int> sid_selected = new Dictionary<string, int>();
 
+            HashSet<string> global_black_list;
+            string global_black_list_file;
+            if (!iniData.TryGetKey("black_list", out global_black_list_file))
+                global_black_list = new HashSet<string>();
+            else
+                global_black_list = new HashSet<string>(File.ReadLines(global_black_list_file)
+                                        .Select(line => line.Split('\t')[0])
+                                        .Distinct(),
+                                        StringComparer.Ordinal);
+
             foreach (var sec in iniData.Sections)
             {
                 Console.WriteLine("Section: {0}", sec.SectionName);
@@ -225,7 +235,7 @@ namespace TsvImage
                 var sid_count = File.ReadLines(stat_file)
                     .Select(line => line.Split('\t'))
                     .ToDictionary(cols => cols[0], cols => Convert.ToInt32(cols[1]));
-                Console.WriteLine("# of entities in data: {0}", sid_count.Count());
+                Console.WriteLine("# of entities in data : {0}", sid_count.Count());
 
                 HashSet<string> black_list;
                 string black_list_file = sec.Keys["black_list"];
@@ -243,10 +253,11 @@ namespace TsvImage
 
                 var sid_list = File.ReadLines(white_list_file)
                         .Select(line => line.Split('\t')[0])
+                        .Where(sid => !global_black_list.Contains(sid))
                         .Where(sid => !black_list.Contains(sid))
                         .Where(sid => !sid_selected.ContainsKey(sid))
-                        .Select(sid => Tuple.Create(sid, Math.Min(cmd.maxPos, sid_count[sid])))
-                        .Where(tp => tp.Item2 >= cmd.minPos)
+                        .Select(sid => Tuple.Create(sid, Math.Min(cmd.max, sid_count[sid])))
+                        .Where(tp => tp.Item2 >= cmd.min)
                         .Select(tp =>
                         {
                             sid_selected.Add(tp.Item1, tp.Item2);
@@ -255,12 +266,12 @@ namespace TsvImage
                         .ToList();
 
                 Console.WriteLine("# of entities selected: {0}", sid_list.Count());
-                Console.WriteLine("# of images selected: {0}", sid_list.Sum(tp => tp.Item2));
+                Console.WriteLine("# of images selected  : {0}", sid_list.Sum(tp => tp.Item2));
                 Console.WriteLine();
             }
 
             Console.WriteLine("Total # of entities: {0}", sid_selected.Count());
-            Console.WriteLine("Total # of images: {0}", sid_selected.Sum(kv => kv.Value));
+            Console.WriteLine("Total # of images  : {0}", sid_selected.Sum(kv => kv.Value));
 
             return sid_selected;
         }
@@ -274,8 +285,8 @@ namespace TsvImage
         {
             [Argument(ArgumentType.AtMostOnce, HelpText = "Output TSV file (default: replace ini file .ext with .tsv)")]
             public string outTsv = null;
-            [Argument(ArgumentType.AtMostOnce, HelpText = "Max image size (default: 256)")]
-            public int size = 256;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Max image size (default: 0, no resize)")]
+            public int size = 0;
         }
 
         static void View2Data(ArgsView2Data cmd)
@@ -313,7 +324,7 @@ namespace TsvImage
                     string sid = cols[label_col];
                     if (!sid_selected.ContainsKey(sid))
                         continue;
-                    if (sid_count[sid] >= cmd.maxPos)
+                    if (sid_count[sid] >= cmd.max)
                         continue;
 
                     // if sid has been used in previous sections, skip it
