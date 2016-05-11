@@ -34,7 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="INIFileParser">
-      <HintPath>..\..\packages\ini-parser.2.2.4\lib\net20\INIFileParser.dll</HintPath>
+      <HintPath>..\..\..\packages\ini-parser.2.2.4\lib\net20\INIFileParser.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -61,11 +61,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\caffe\MSVC\TsvTool.Utility\TsvTool.Utility.csproj">
+    <ProjectReference Include="..\..\..\caffe\MSVC\TsvTool.Utility\TsvTool.Utility.csproj">
       <Project>{19ad9555-4cd9-45ad-9c07-a55f415dc2ed}</Project>
       <Name>TsvTool.Utility</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CmdParser\CmdParser.csproj">
+    <ProjectReference Include="..\..\Lib\CmdParser\CmdParser.csproj">
       <Project>{5f0e7b5b-5924-4f2a-8cfe-d016003997d0}</Project>
       <Name>CmdParser</Name>
     </ProjectReference>
