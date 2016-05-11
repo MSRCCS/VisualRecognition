@@ -32,7 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FaceSdkManagedWrapper">
-      <HintPath>..\..\Dependencies\FaceSDK.v2\FaceSdkManagedWrapper.dll</HintPath>
+      <HintPath>..\..\..\dependencies\FaceSDK.v2\FaceSdkManagedWrapper.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -52,7 +52,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\caffe\MSVC\caffe.managed\caffe.managed.vcxproj">
+    <ProjectReference Include="..\..\..\caffe\MSVC\caffe.managed\caffe.managed.vcxproj">
       <Project>{350020ca-75b9-425e-85ca-dd8cf8cfba9b}</Project>
       <Name>caffe.managed</Name>
     </ProjectReference>

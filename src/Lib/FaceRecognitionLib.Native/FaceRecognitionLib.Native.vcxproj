@@ -54,7 +54,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;FACERECOGNITION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\caffe\msvc\caffe.native</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\caffe\msvc\caffe.native</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -76,7 +76,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;FACERECOGNITION_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\caffe\msvc\caffe.native</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\caffe\msvc\caffe.native</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -107,7 +107,7 @@
     <ClCompile Include="FaceRecognition.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\caffe\MSVC\caffe.native\caffe.native.vcxproj">
+    <ProjectReference Include="..\..\..\caffe\MSVC\caffe.native\caffe.native.vcxproj">
       <Project>{214f9422-476a-4b18-83a5-2e1fd5d57ac7}</Project>
     </ProjectReference>
   </ItemGroup>
