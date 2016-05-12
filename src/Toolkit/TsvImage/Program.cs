@@ -214,11 +214,13 @@ namespace TsvImage
             ParserX.AddTask<ArgsLfwEval>(LfwEval, "Eval LFW using face feature file and pair list file");
             ParserX.AddTask<ArgsCeleb>(Celeb, "Celebrity selection");
             ParserX.AddTask<ArgsCelebRemove>(CelebRemove, "Celebrity removal for ancient people");
+            ParserX.AddTask<ArgsCeleb2Phase>(Celeb2Phase, "Divide celebrities into multiple phrases");
             ParserX.AddTask<ArgsClassVariance>(ClassVariance, "Calculate class variance");
             ParserX.AddTask<ArgsParseResult>(ParseResult, "Parse Caffe evaluation result for accuracy per class");
             ParserX.AddTask<ArgsViewCheck>(ViewCheck, "Data repo view check");
             ParserX.AddTask<ArgsView2Data>(View2Data, "Data repo view to data");
             ParserX.AddTask<ArgsWrongCeleb>(WrongCeleb, "Detect wrong celebs based on the prediction result");
+            ParserX.AddTask<ArgsImageScale>(ImageScale, "Generate multiple images by down scaling");
             if (ParserX.ParseArgumentsWithUsage(args))
             {
                 Stopwatch timer = Stopwatch.StartNew();
