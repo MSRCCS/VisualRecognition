@@ -442,5 +442,40 @@ namespace TsvImage
             File.WriteAllLines(cmd.outTsv, lines);
             Console.WriteLine("Done.");
         }
+
+        class ArgsCeleb2Phase
+        {
+            [Argument(ArgumentType.Required, HelpText = "Input entity type file")]
+            public string entityType = null;
+            [Argument(ArgumentType.Required, HelpText = "Input type phase file")]
+            public string typePhase = null;
+        }
+
+        static void Celeb2Phase(ArgsCeleb2Phase cmd)
+        {
+            var typeDict = File.ReadLines(cmd.typePhase)
+                .Select(line => line.Split('\t'))
+                .Where(cols => string.CompareOrdinal(cols[2], "n.a") != 0)
+                .ToDictionary(cols => cols[0], cols => Convert.ToInt32(cols[2]));
+
+            var entity_phase = File.ReadLines(cmd.entityType)
+                .ReportProgress("Lines read")
+                .Select(line => line.Split('\t'))
+                .Where(cols => typeDict.ContainsKey(cols[1]))
+                .GroupBy(cols => cols[0])
+                .Select(g =>
+                {
+                    var max_phase = g.AsEnumerable()
+                        .Select(cols => new { sid = cols[0], phase = typeDict[cols[1]] })
+                        .OrderByDescending(x => x.phase)
+                        .First();
+                    return max_phase;
+                })
+                .OrderBy(x => x.phase)
+                .ThenBy(x => x.sid)
+                .Select(x => x.sid + "\t" + x.phase);
+
+            File.WriteAllLines(Path.ChangeExtension(cmd.entityType, ".phase.tsv"), entity_phase);
+        }
     }
 }
