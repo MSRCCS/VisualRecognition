@@ -48,6 +48,7 @@
   <ItemGroup>
     <Compile Include="Distance.cs" />
     <Compile Include="CelebSelection.cs" />
+    <Compile Include="ImageTransform.cs" />
     <Compile Include="LFW.cs" />
     <Compile Include="ParseResult.cs" />
     <Compile Include="VisualGenome.cs" />

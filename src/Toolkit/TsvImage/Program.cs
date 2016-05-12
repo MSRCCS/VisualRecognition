@@ -219,6 +219,7 @@ namespace TsvImage
             ParserX.AddTask<ArgsViewCheck>(ViewCheck, "Data repo view check");
             ParserX.AddTask<ArgsView2Data>(View2Data, "Data repo view to data");
             ParserX.AddTask<ArgsWrongCeleb>(WrongCeleb, "Detect wrong celebs based on the prediction result");
+            ParserX.AddTask<ArgsImageScale>(ImageScale, "Generate multiple images by down scaling");
             if (ParserX.ParseArgumentsWithUsage(args))
             {
                 Stopwatch timer = Stopwatch.StartNew();
