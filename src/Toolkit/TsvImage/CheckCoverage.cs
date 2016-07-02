@@ -101,11 +101,6 @@ namespace TsvImage
                 count_total, count_total_recognized, count_total_correct, 
                 (float)count_total_recognized / count_total, (float)count_total_correct / count_total_recognized, 
                 cmd.thresh, cmd.inTsvLabel));
-            ////append a column to image data file
-            //var imgLines = File.ReadLines(cmd.inTsvLabel)
-            //    .Zip(lines, (first, second) => first + "\t" + second.correct);
-            //File.WriteAllLines(cmd.inTsv, imgLines);
-
         }
 
     }
