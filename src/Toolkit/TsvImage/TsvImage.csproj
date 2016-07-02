@@ -46,6 +46,7 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CheckCoverage.cs" />
     <Compile Include="Distance.cs" />
     <Compile Include="CelebSelection.cs" />
     <Compile Include="ImageTransform.cs" />
