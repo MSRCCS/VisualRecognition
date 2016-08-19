@@ -222,6 +222,8 @@ namespace TsvImage
             ParserX.AddTask<ArgsWrongCeleb>(WrongCeleb, "Detect wrong celebs based on the prediction result");
             ParserX.AddTask<ArgsImageScale>(ImageScale, "Generate multiple images by down scaling");
             ParserX.AddTask<ArgsCheckCoverage>(CheckCoverage, "Parse Caffe evaluation result for false alarm or detection rate");
+            ParserX.AddTask<ArgsFindSatoriID>(FindSatoriID, "given a entity name string, find its corresponding satoriID");
+
             if (ParserX.ParseArgumentsWithUsage(args))
             {
                 Stopwatch timer = Stopwatch.StartNew();

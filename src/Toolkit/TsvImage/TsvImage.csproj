@@ -49,6 +49,7 @@
     <Compile Include="CheckCoverage.cs" />
     <Compile Include="Distance.cs" />
     <Compile Include="CelebSelection.cs" />
+    <Compile Include="FindSatoriID.cs" />
     <Compile Include="ImageTransform.cs" />
     <Compile Include="LFW.cs" />
     <Compile Include="ParseResult.cs" />
@@ -70,6 +71,10 @@
     <ProjectReference Include="..\..\Lib\CmdParser\CmdParser.csproj">
       <Project>{5f0e7b5b-5924-4f2a-8cfe-d016003997d0}</Project>
       <Name>CmdParser</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EntityTools\EntityTools.fsproj">
+      <Project>{1018c0d5-4379-4d9a-ad74-29f4fb497452}</Project>
+      <Name>EntityTools</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

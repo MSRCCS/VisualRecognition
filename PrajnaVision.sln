@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{CB87CEF9-6D2D-46CF-9C95-1EA94A654C0F}"
 EndProject
@@ -36,6 +36,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MSVC", "MSVC", "{C0FF4F98-3BC2-40A3-8DA5-477F76D542FB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FaceRecognition", "src\FaceRecognition\FaceRecognition.csproj", "{DDA9D911-F8CB-4A7A-AE99-7DDE797B5F67}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "EntityTools", "src\Toolkit\EntityTools\EntityTools.fsproj", "{1018C0D5-4379-4D9A-AD74-29F4FB497452}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -154,6 +156,18 @@ Global
 		{DDA9D911-F8CB-4A7A-AE99-7DDE797B5F67}.Release|Mixed Platforms.Build.0 = Release|x64
 		{DDA9D911-F8CB-4A7A-AE99-7DDE797B5F67}.Release|x64.ActiveCfg = Release|x64
 		{DDA9D911-F8CB-4A7A-AE99-7DDE797B5F67}.Release|x64.Build.0 = Release|x64
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Debug|x64.Build.0 = Debug|Any CPU
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Release|x64.ActiveCfg = Release|Any CPU
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -174,5 +188,6 @@ Global
 		{19AD9555-4CD9-45AD-9C07-A55F415DC2ED} = {C0FF4F98-3BC2-40A3-8DA5-477F76D542FB}
 		{C0FF4F98-3BC2-40A3-8DA5-477F76D542FB} = {373C5585-E6E1-46D9-907B-037C5C0DFEAC}
 		{DDA9D911-F8CB-4A7A-AE99-7DDE797B5F67} = {1C356A39-2C1B-4061-A252-263DF55C2F05}
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452} = {46A3CD11-6B92-49C9-B51F-C0CC096761B6}
 	EndGlobalSection
 EndGlobal
