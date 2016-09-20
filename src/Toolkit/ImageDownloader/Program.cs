@@ -32,6 +32,8 @@ namespace ImageAcquisition
             public int maxDownloads = 0;
             [Argument(ArgumentType.AtMostOnce, HelpText = "Discard broken images? (default: true)")]
             public bool discardBroken = true;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Keep PNG format untouched (default: false)")]
+            public bool png = false;
         }
 
         private static async Task<byte[]> DownloadWebImageToByteArray(string uri)
@@ -59,7 +61,7 @@ namespace ImageAcquisition
             return data;
         }
 
-        static async Task<string> DownloadOneImage(string murl, int maxImageSize)
+        static async Task<string> DownloadOneImage(string murl, int maxImageSize, bool keepPng)
         {
             string strImageStream = string.Empty;
 
@@ -73,10 +75,13 @@ namespace ImageAcquisition
                         using (MemoryStream ms = new MemoryStream(data))
                         using (Bitmap bmp = new Bitmap(ms))
                         {
-                            Bitmap resizedBmp = ImageUtility.DownsizeImage(bmp, maxImageSize > 0 ? maxImageSize : Int32.MaxValue);
-                            data = ImageUtility.SaveImageToJpegInBuffer(resizedBmp);
-                            if (!Object.ReferenceEquals(bmp, resizedBmp))
-                                resizedBmp.Dispose();
+                            if (!keepPng || bmp.PixelFormat != PixelFormat.Format32bppArgb)
+                            {
+                                Bitmap resizedBmp = ImageUtility.DownsizeImage(bmp, maxImageSize > 0 ? maxImageSize : Int32.MaxValue);
+                                data = ImageUtility.SaveImageToJpegInBuffer(resizedBmp);
+                                if (!Object.ReferenceEquals(bmp, resizedBmp))
+                                    resizedBmp.Dispose();
+                            }
                         }
                         strImageStream = Convert.ToBase64String(data);
                     }
@@ -110,7 +115,7 @@ namespace ImageAcquisition
                     .Select(async cols =>
                     {
                         count_started++;
-                        var imageStream = await DownloadOneImage(cols[cmd.murlCol], cmd.resize);
+                        var imageStream = await DownloadOneImage(cols[cmd.murlCol], cmd.resize, cmd.png);
 
                         if (string.IsNullOrEmpty(imageStream))
                             swFailed.WriteLine(string.Join("\t", cols));

@@ -102,3 +102,6 @@ packages/
 
 # CUDA
 *.deps
+
+# PyCharm files
+.idea/
