@@ -71,6 +71,10 @@
       <Project>{5f0e7b5b-5924-4f2a-8cfe-d016003997d0}</Project>
       <Name>CmdParser</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Lib\MCFeatureLib\MCFeatureLib.vcxproj">
+      <Project>{0d02af0a-bc79-42bf-809c-8e5ea499ea73}</Project>
+      <Name>MCFeatureLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
