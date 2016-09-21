@@ -312,12 +312,9 @@ namespace TsvImage
             ParserX.AddTask<ArgsView2Data>(View2Data, "Data repo view to data");
             ParserX.AddTask<ArgsWrongCeleb>(WrongCeleb, "Detect wrong celebs based on the prediction result");
             ParserX.AddTask<ArgsImageScale>(ImageScale, "Generate multiple images by down scaling");
-<<<<<<< 27857092857865aba25e804b296832d2f7b66de5
             ParserX.AddTask<ArgsCheckCoverage>(CheckCoverage, "Parse Caffe evaluation result for false alarm or detection rate");
-=======
             ParserX.AddTask<ArgsFilterRGBA>(FilterRGBA, "Filter rgba images with transparent background");
             ParserX.AddTask<ArgsExtractDupFeature>(ExtractDupFeature, "Extract dup detection feature");
->>>>>>> Add dedup feature extraction to support dedup logo images
             if (ParserX.ParseArgumentsWithUsage(args))
             {
                 Stopwatch timer = Stopwatch.StartNew();
