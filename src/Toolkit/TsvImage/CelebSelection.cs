@@ -200,6 +200,56 @@ namespace TsvImage
             Console.WriteLine("\nDone.");
         }
 
+        class ArgsClassMeanVar
+        {
+            [Argument(ArgumentType.Required, HelpText = "Input TSV file")]
+            public string inTsv = null;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Output TSV file (default: replace InTsv .ext with .mean.tsv)")]
+            public string outTsv = null;
+            [Argument(ArgumentType.Required, HelpText = "Column index for feature")]
+            public int feature = -1;
+            [Argument(ArgumentType.Required, HelpText = "Column index for label")]
+            public int label = -1;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Feature normalization (default: false, no normalization)")]
+            public bool norm = false;
+        }
+
+        static void ClassMeanVar(ArgsClassMeanVar cmd)
+        {
+            if (cmd.outTsv == null)
+                cmd.outTsv = Path.ChangeExtension(cmd.inTsv, ".mean.tsv");
+
+            var lines = File.ReadLines(cmd.inTsv)
+                .ReportProgress("Lines processed")
+                .Select(x => x.Split('\t'))
+                .Select(cols => new { c = cols[cmd.label], f = ConvertFeature(cols[cmd.feature], cmd.norm) })
+                .GroupBy(x => x.c)
+                .ReportProgress("Groups processed")
+                .Select(g =>
+                {
+                    // calc mean and var for top 20 images
+                    var mean = CalcMean(g.AsEnumerable(), x => x.f);
+                    var var = CalcVariance(g.AsEnumerable(), mean, x => x.f);
+
+                    byte[] buff = new byte[mean.Length * sizeof(float)];
+                    Buffer.BlockCopy(mean, 0, buff, 0, buff.Length);
+                    var mean_b64 = Convert.ToBase64String(buff);
+
+                    return new
+                    {
+                        key = g.Key,
+                        count = g.Count(),
+                        var = var.ToString(),
+                        mean = mean_b64
+                    };
+                })
+                .Select(x => x.key + "\t" + x.count + "\t" + x.var + "\t" + x.mean);
+
+            File.WriteAllLines(cmd.outTsv, lines);
+
+            Console.WriteLine("\nDone.");
+        }
+
         class ArgsViewCheck
         {
             [Argument(ArgumentType.Required, HelpText = "Input INI file for the view of data repo")]
