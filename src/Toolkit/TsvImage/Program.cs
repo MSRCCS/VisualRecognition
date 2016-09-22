@@ -278,7 +278,7 @@ namespace TsvImage
                         MCFeatureExtractor.ExtrFeature(cmd.feature, bmp, f);
                         byte[] fea = new byte[f.Length * sizeof(float)];
                         Buffer.BlockCopy(f, 0, fea, 0, fea.Length);
-                        cols[cmd.image] = Convert.ToBase64String(fea);
+                        cols.Add(Convert.ToBase64String(fea));
                     }
                     return cols;
                 })
@@ -315,6 +315,7 @@ namespace TsvImage
             ParserX.AddTask<ArgsCheckCoverage>(CheckCoverage, "Parse Caffe evaluation result for false alarm or detection rate");
             ParserX.AddTask<ArgsFilterRGBA>(FilterRGBA, "Filter rgba images with transparent background");
             ParserX.AddTask<ArgsExtractDupFeature>(ExtractDupFeature, "Extract dup detection feature");
+            ParserX.AddTask<ArgsDedup>(Dedup, "Pairwise dedup within each group");
             if (ParserX.ParseArgumentsWithUsage(args))
             {
                 Stopwatch timer = Stopwatch.StartNew();
