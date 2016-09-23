@@ -22,9 +22,9 @@ Train=[
     action="train"
     modelPath="$ModelDir$/UnifiedVisualNet"
 
-     BrainScriptNetworkBuilder =(new ComputationNetwork{
-        include "$ConfigDir$/UnifiedVisualNet.bs"
-	})
+     NDLNetworkBuilder=[
+        networkDescription="$ConfigDir$/UnifiedVisualNet_NDL.ndl"
+    ]
     
     SGD=[
         epochSize=0

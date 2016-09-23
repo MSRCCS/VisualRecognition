@@ -1,0 +1,178 @@
+# Brainscript image trainer. 
+
+
+    ImageW = 300
+    ImageH = 300
+    ImageC = 3
+    labelDim = 1000
+
+    features = Input((ImageW: ImageH: ImageC), tag = "feature")
+    labels = Input(labelDim, tag = "label")
+    
+    # Kernels width and height.
+    kW = 3
+    kH = 3
+    # Kernel stride.
+    hs = 1
+    vs = 1
+    
+    # Pooling settings.
+    poolW = 2
+    poolH = 2
+    poolhs = 2
+    poolvs = 2
+    
+    # Initial parameter values.
+    convWScale = 7.07
+    convBValue = 0
+    scValue = 0.03
+    fc1WScale = 3.0
+    fc1BValue = 1
+    fc2WScale = 3.0
+    fc2BValue = 1
+    fc3WScale = 1.0
+    fc3BValue = 1
+	bnTimeConst = 32768
+	fcWScale = 1.13
+    fcBValue = 0
+	
+	Conv(W, inp, outMap,inMap, inWCount, kW, kH, hStride, vStride) =
+[
+    c = Convolution(W, inp, (kW:kH:inMap), mapDims = outMap, stride = (hStride:vStride:inMap), imageLayout = "cudnn")
+].c
+
+BN(inp, mapCount, bValue, scValue, bnTimeConst) = 
+[
+    b = Parameter(mapCount, 1, init = "fixedValue", value = bValue)
+    sc = Parameter(mapCount, 1, init = "fixedValue", value = scValue)
+    m = Parameter(mapCount, 1, init = "fixedValue", value = 0, learningRateMultiplier = 0)
+    v = Parameter(mapCount, 1, init = "fixedValue", value = 0, learningRateMultiplier = 0)
+    
+    y = BatchNormalization(inp, sc, b, m, v, true, normalizationTimeConstant = bnTimeConst, epsilon = 0.000000001, imageLayout = "cudnn")
+].y
+
+ConvBNLayerW(W, inp,outMap,inMap, inWCount, kW, kH, hStride, vStride, bValue, scValue, bnTimeConst) =
+[
+    c = Conv(W, inp,outMap, inMap,inWCount,  kW, kH, hStride, vStride)
+    y = BN(c, outMap, bValue, scValue, bnTimeConst)
+].y
+
+ConvBNLayer(inp, outMap,inMap, inWCount, kW, kH, hStride, vStride, wScale, bValue, scValue, bnTimeConst) =
+[
+    W = Parameter(outMap, inWCount, init = "gaussian", initValueScale = wScale)
+    c = Conv(W, inp, outMap,inMap, inWCount, kW, kH, hStride, vStride)
+    y = BN(c, outMap, bValue, scValue, bnTimeConst)
+].y
+
+ConvBNReLULayer(inp, outMap,inMap, inWCount, kW, kH, hStride, vStride, wScale, bValue, scValue, bnTimeConst) =
+[
+    c = ConvBNLayer(inp, outMap,inMap, inWCount, kW, kH, hStride, vStride, wScale, bValue, scValue, bnTimeConst)
+    y = RectifiedLinear(c)
+].y
+
+DnnLayer(hiddenDim, labelDim, x, wScale, bValue)=
+[
+    W = Parameter(labelDim, hiddenDim, init = "gaussian", initValueScale = wScale)
+    b = Parameter(labelDim,1, init = "fixedValue", value = bValue)
+    t = Times(W, x)
+    z = Plus(t, b)
+].z
+
+    cMap1 = 64
+    conv1 = ConvBNReLULayer(features, cMap1, 3, 27, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
+    conv2 = ConvBNReLULayer(conv1, cMap1, cMap1, 576, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
+
+    pool1 = MaxPooling(conv2, poolW, poolH, poolhs, poolvs, imageLayout = "cudnn")
+
+    cMap3 = 128
+    conv3 = ConvBNReLULayer(pool1, cMap3, cMap1,576, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
+    conv4 = ConvBNReLULayer(conv3, cMap3, cMap3,1152, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
+   
+    pool2 = MaxPooling(conv4, poolW, poolH, poolhs, poolvs, imageLayout = "cudnn")
+
+    cMap5 = 256
+    conv5 = ConvBNReLULayer(pool2, cMap5, cMap3,1152, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
+    conv6 = ConvBNReLULayer(conv5, cMap5, cMap5,2304, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
+    conv7 = ConvBNReLULayer(conv6, cMap5, cMap5,2304, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
+	# Use VGG-16 for simplicy
+    # conv8 = ConvBNReLULayer(conv7, cMap5, 2304, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
+
+    pool3 = MaxPooling(conv7, poolW, poolH, poolhs, poolvs, imageLayout = "cudnn")
+
+    cMap9 = 512
+    conv9 = ConvBNReLULayer(pool3, cMap9, cMap5,2304, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
+    conv10 = ConvBNReLULayer(conv9, cMap9, cMap9,4608, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
+    conv11 = ConvBNReLULayer(conv10, cMap9, cMap9,4608, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
+	# Use VGG-16 
+    # conv12 = ConvBNReLULayer(conv11, cMap9, cMap9, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
+
+    pool4 = MaxPooling(conv11, poolW, poolH, poolhs, poolvs, imageLayout = "cudnn")
+
+    cMap13 = 512
+	# Use Concept similar to DeepLab-LargeFOV, change the following layer to 
+	# 3x3 stride 1
+    conv13 = ConvBNReLULayer(pool4, cMap13, cMap9,4608, 3, 3, 1, 1, convWScale, convBValue, scValue,bnTimeConst)
+    conv14 = ConvBNReLULayer(conv13, cMap13, cMap9,4608, 3, 3, 1, 1, convWScale, convBValue, scValue,bnTimeConst)
+    conv15 = ConvBNReLULayer(conv14, cMap13, cMap9,4608, 3, 3, 1, 1, convWScale, convBValue, scValue,bnTimeConst)
+	# Use VGG-16
+    # conv16 = ConvBNReLULayer(conv15, cMap13, cMap9, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
+	
+	# FC6 and FC7 layer has 1024 features
+	cMap_FC6 = 1024
+	# input weight dimension, 3x3x512
+	inW_FC6 = 4608
+	Conv_FC6 = ConvBNReLULayer(conv15, cMap_FC6, cMap9,inW_FC6, 3, 3, 1, 1, convWScale, convBValue, scValue,bnTimeConst)
+	inW_FC7 = 1024
+	Conv_FC7 = ConvBNReLULayer(Conv_FC6, cMap_FC6, inW_FC7, inW_FC7, 1, 1, 1, 1, convWScale, convBValue, scValue,bnTimeConst)
+	cMap_Conv81 = 256
+	inW_Conv81 = 1024
+	Conv8_1 = ConvBNReLULayer(Conv_FC7, cMap_Conv81, inW_Conv81,inW_Conv81, 1, 1, 1, 1, convWScale, convBValue, scValue,bnTimeConst)
+	cMap_Conv82 = 512
+	inW_Conv82 = 2304
+	Conv8_2 = ConvBNReLULayer(Conv8_1, cMap_Conv82, cMap_Conv81,inW_Conv82, 3, 3, 2, 2, convWScale, convBValue, scValue,bnTimeConst)
+	cMap_Conv91 = 128
+	inW_Conv91 = 512
+	Conv9_1 = ConvBNReLULayer(Conv8_2, cMap_Conv91, cMap_Conv82,inW_Conv91, 1, 1, 1, 1, convWScale, convBValue, scValue,bnTimeConst)
+	cMap_Conv92 = 256
+	inW_Conv92 = 1152
+	Conv9_2 = ConvBNReLULayer(Conv9_1, cMap_Conv92, cMap_Conv91,inW_Conv92, 3, 3, 2, 2, convWScale, convBValue, scValue,bnTimeConst)
+	cMap_Conv101 = 128
+	inW_Conv101 = 256
+	Conv10_1 = ConvBNReLULayer(Conv9_2, cMap_Conv101, cMap_Conv92,inW_Conv101, 1, 1, 1, 1, convWScale, convBValue, scValue,bnTimeConst)
+	cMap_Conv102 = 256
+	inW_Conv102 = 1152
+	Conv10_2 = ConvBNReLULayer(Conv10_1, cMap_Conv102, cMap_Conv101,inW_Conv102, 3, 3, 2, 2, convWScale, convBValue, scValue,bnTimeConst)
+	
+	pool_conv11W = 37
+	pool_conv11H = 37
+	pool_conv11 = AveragePooling(conv11, pool_conv11W, pool_conv11H, 1, 1, imageLayout = "cudnn")
+	# pool_convFC6W = 18
+    # pool_convFC6H = 18
+    # pool_convFC6 = AveragePooling(Conv_FC6, pool_convFC6W, pool_convFC6H, 1, 1, imageLayout = "cudnn")
+	pool_convFC7W = 18
+	pool_convFC7H = 18
+	pool_convFC7 = AveragePooling(Conv_FC7, pool_convFC7W, pool_convFC7H, 1, 1, imageLayout = "cudnn")
+	pool_conv82W = 9
+	pool_conv82H = 9
+	pool_conv82 = AveragePooling(Conv8_2, pool_conv82W, pool_conv82H, 1, 1, imageLayout = "cudnn")
+	pool_conv92W = 5
+	pool_conv92H = 5
+	pool_conv92 = AveragePooling(Conv9_2, pool_conv92W, pool_conv92H, 1, 1, imageLayout = "cudnn")
+	pool_conv102W = 3
+	pool_conv102H = 3
+	pool_conv102 = AveragePooling(Conv10_2, pool_conv102W, pool_conv102H, 1, 1, imageLayout = "cudnn")
+
+	# Conv11: 37x37x512
+	# Conv_FC7: 18x18x1024
+	# Conv82: 9x9x512
+	# Conv92: 5x5x256
+	# Conv102:3x3x256
+	poolFinal = Splice( pool_conv11: pool_convFC7: pool_conv82: pool_conv92: pool_conv102, axis=3)
+	cMapFinal = 2560
+	
+    ol = DnnLayer(cMapFinal, labelDim, poolFinal, fcWScale, fcBValue)
+
+    CE = CrossEntropyWithSoftmax(labels, ol, tag = "criterion")
+    Err = ClassificationError(labels, ol, tag = "evaluation")
+    OutputNodes = ol
+
