@@ -143,3 +143,4 @@ MaxNDPooling(inp, kW, kH, hStride, vStride)
 [
     p = Pooling(inp, "max", {kW, kH, 1}, stride = {hStride, vStride, 1}, autoPadding = {true, true, false}, imageLayout = "cudnn")
 ]
+
