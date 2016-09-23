@@ -59,8 +59,8 @@ Train=[
         randomize="Auto"
         features=[
             # Below are the required parameters.
-            width=224
-            height=224
+            width=300
+            height=300
             channels=3
             # Below are the optional parameters.
             # Possible values: Center, Random. Default: Center
