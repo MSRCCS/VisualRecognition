@@ -117,8 +117,8 @@ DnnLayer(hiddenDim, labelDim, x, wScale, bValue)=
 	rn5a = ConvBNReLULayer(rn4d, cMap5, cMap4, 4608, kW, kH, hs2, vs2, convWScale, convBValue, scValue,bnTimeConst)
 	
 	# 3x3x1024
-	pool1W = 56
-	pool1H = 56
+	pool1W = 55
+	pool1H = 55
 	# dim: 64
 	pool1a = MaxPooling( rn1a, pool1W, pool1H, 1, 1, imageLayout = "cudnn")
 	pool1b = MaxPooling( rn1b, pool1W, pool1H, 1, 1, imageLayout = "cudnn")
@@ -149,8 +149,8 @@ DnnLayer(hiddenDim, labelDim, x, wScale, bValue)=
 	pool4c = AveragePooling( rn4c, pool3W, pool3H, 1, 1, imageLayout = "cudnn")
 	pool4d = AveragePooling( rn4d, pool3W, pool3H, 1, 1, imageLayout = "cudnn")
 	# level 5
-	pool5W = 3
-	pool5H = 3
+	pool5W = 4
+	pool5H = 4
 	pool5a = AveragePooling( rn5a, pool5W, pool5H, 1, 1, imageLayout = "cudnn")
 
     poolFinal = Splice( pool1a:pool1b:pool1c:pool1d:pool2a:pool2b:pool2c:pool2d:pool3a:pool3b:pool3c:pool3d:pool4a:pool4b:pool4c:pool4d:pool5a, axis=3)
