@@ -82,7 +82,7 @@ DnnLayer(hiddenDim, labelDim, x, wScale, bValue)=
 	# Convolution layer 1, 
 	conv1WScale = 0.6
     cMap1 = 64
-    conv1 = ConvBNReLULayer(features, 3, cMap1, 147, 7, 7, 2, 2, conv1WScale, convBValue, scValue, bnTimeConst)
+    conv1 = ConvBNReLULayer(features, cMap1, 3, 147, 7, 7, 2, 2, conv1WScale, convBValue, scValue, bnTimeConst)
 	# 112x112x64 
 	first1W = 3
     first1H = 3
@@ -95,26 +95,26 @@ DnnLayer(hiddenDim, labelDim, x, wScale, bValue)=
 	rn1c = ConvBNReLULayer(rn1b, cMap1, cMap1, 576, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
 	rn1d = ConvBNReLULayer(rn1c, cMap1, cMap1, 576, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
 	cMap2 = 128 
-	rn2a = ConvBNReLULayer(rn1d, cMap1, cMap2, 576, kW, kH, hs2, vs2, convWScale, convBValue, scValue,bnTimeConst)
+	rn2a = ConvBNReLULayer(rn1d, cMap2, cMap1, 576, kW, kH, hs2, vs2, convWScale, convBValue, scValue,bnTimeConst)
 	# 28x28x128
 	rn2b = ConvBNReLULayer(rn2a, cMap2, cMap2, 1152, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
 	rn2c = ConvBNReLULayer(rn2b, cMap2, cMap2, 1152, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
 	rn2d = ConvBNReLULayer(rn2c, cMap2, cMap2, 1152, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
 	cMap3 = 256 
-	rn3a = ConvBNReLULayer(rn2d, cMap2, cMap3, 1152, kW, kH, hs2, vs2, convWScale, convBValue, scValue,bnTimeConst)
+	rn3a = ConvBNReLULayer(rn2d, cMap3, cMap2, 1152, kW, kH, hs2, vs2, convWScale, convBValue, scValue,bnTimeConst)
 	# 14x14x256
 	rn3b = ConvBNReLULayer(rn3a, cMap3, cMap3, 2304, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
 	rn3c = ConvBNReLULayer(rn3b, cMap3, cMap3, 2304, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
 	rn3d = ConvBNReLULayer(rn3c, cMap3, cMap3, 2304, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
 	cMap4 = 512
-	rn4a = ConvBNReLULayer(rn3d, cMap3, cMap4, 2304, kW, kH, hs2, vs2, convWScale, convBValue, scValue,bnTimeConst)
+	rn4a = ConvBNReLULayer(rn3d, cMap4, cMap3, 2304, kW, kH, hs2, vs2, convWScale, convBValue, scValue,bnTimeConst)
 	# 7x7x512
 	rn4b = ConvBNReLULayer(rn4a, cMap4, cMap4, 4608, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
 	rn4c = ConvBNReLULayer(rn4b, cMap4, cMap4, 4608, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
 	rn4d = ConvBNReLULayer(rn4c, cMap4, cMap4, 4608, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
 	# 7x7x512
 	cMap5 = 1024
-	rn5a = ConvBNReLULayer(rn4d, cMap4, cMap5, 4608, kW, kH, hs2, vs2, convWScale, convBValue, scValue,bnTimeConst)
+	rn5a = ConvBNReLULayer(rn4d, cMap5, cMap4, 4608, kW, kH, hs2, vs2, convWScale, convBValue, scValue,bnTimeConst)
 	
 	# 3x3x1024
 	pool1W = 56
