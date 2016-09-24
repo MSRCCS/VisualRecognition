@@ -84,11 +84,11 @@ DnnLayer(hiddenDim, labelDim, x, wScale, bValue)=
     cMap1 = 64
     conv1 = ConvBNReLULayer(features, 3, cMap1, 147, 7, 7, 2, 2, conv1WScale, convBValue, scValue, bnTimeConst)
 	# 112x112x64 
-	pool1W = 3
-    pool1H = 3
+	first1W = 3
+    first1H = 3
     pool1hs = 2
     pool1vs = 2
-    pool1 = MaxPooling(conv1, pool1W, pool1H, pool1hs, pool1vs, imageLayout = "cudnn")
+    pool1 = MaxPooling(conv1, first1W, first1H, pool1hs, pool1vs, imageLayout = "cudnn")
 	# 56x56x64
     rn1a = ConvBNReLULayer(pool1, cMap1, cMap1, 576, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
     rn1b = ConvBNReLULayer(rn1a, cMap1, cMap1, 576, kW, kH, hs, vs, convWScale, convBValue, scValue,bnTimeConst)
