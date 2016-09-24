@@ -144,10 +144,10 @@ DnnLayer(hiddenDim, labelDim, x, wScale, bValue)=
 	pool4W = 7
 	pool4H = 7
 	# dim: 512
-	pool4a = AveragePooling( rn4a, pool3W, pool3H, 1, 1, imageLayout = "cudnn")
-	pool4b = AveragePooling( rn4b, pool3W, pool3H, 1, 1, imageLayout = "cudnn")
-	pool4c = AveragePooling( rn4c, pool3W, pool3H, 1, 1, imageLayout = "cudnn")
-	pool4d = AveragePooling( rn4d, pool3W, pool3H, 1, 1, imageLayout = "cudnn")
+	pool4a = AveragePooling( rn4a, pool4W, pool4H, 1, 1, imageLayout = "cudnn")
+	pool4b = AveragePooling( rn4b, pool4W, pool4H, 1, 1, imageLayout = "cudnn")
+	pool4c = AveragePooling( rn4c, pool4W, pool4H, 1, 1, imageLayout = "cudnn")
+	pool4d = AveragePooling( rn4d, pool4W, pool4H, 1, 1, imageLayout = "cudnn")
 	# level 5
 	pool5W = 4
 	pool5H = 4
