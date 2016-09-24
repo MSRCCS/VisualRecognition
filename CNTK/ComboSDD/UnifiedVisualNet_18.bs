@@ -153,7 +153,7 @@ DnnLayer(hiddenDim, labelDim, x, wScale, bValue)=
 	pool5H = 3
 	pool5a = AveragePooling( rn5a, pool5W, pool5H, 1, 1, imageLayout = "cudnn")
 
-    poolFinal = Splice( pool1a:pool1b:pool1c:pool1d:pool2a:pool2b:pool2c:pool2d:pool3a:pool3b:pool3c:pool3d:pool4a:pool4b:pool5c:pool4d:pool5a, axis=3)
+    poolFinal = Splice( pool1a:pool1b:pool1c:pool1d:pool2a:pool2b:pool2c:pool2d:pool3a:pool3b:pool3c:pool3d:pool4a:pool4b:pool4c:pool4d:pool5a, axis=3)
 	cMapFinal = 4864
 	
     ol = DnnLayer(cMapFinal, labelDim, poolFinal, fcWScale, fcBValue)
