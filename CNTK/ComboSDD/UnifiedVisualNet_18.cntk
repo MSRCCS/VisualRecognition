@@ -22,9 +22,9 @@ Train=[
     action="train"
     modelPath="$ModelDir$/UnifiedVisualNet"
 
-     NDLNetworkBuilder=[
-        networkDescription="$ConfigDir$/UnifiedVisualNet_NDL.ndl"
-    ]
+     BrainScriptNetworkBuilder =(new ComputationNetwork{
+        include "$ConfigDir$/UnifiedVisualNet_18.bs"
+	})
     
     SGD=[
         epochSize=0
@@ -59,8 +59,8 @@ Train=[
         randomize="Auto"
         features=[
             # Below are the required parameters.
-            width=300
-            height=300
+            width=224
+            height=224
             channels=3
             # Below are the optional parameters.
             # Possible values: Center, Random. Default: Center
@@ -102,8 +102,8 @@ Test=[
         file="$CommonDir$/val_map.txt"
         randomize="None"
         features=[
-            width=300
-            height=300
+            width=224
+            height=224
             channels=3
             cropType="Center"
             meanFile="$CommonDir$/ImageNet1K_mean.xml"
