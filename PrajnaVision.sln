@@ -1,7 +1,6 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{CB87CEF9-6D2D-46CF-9C95-1EA94A654C0F}"
 EndProject
@@ -92,18 +91,10 @@ Global
 		{DDA9D911-F8CB-4A7A-AE99-7DDE797B5F67}.Debug|x64.Build.0 = Debug|x64
 		{DDA9D911-F8CB-4A7A-AE99-7DDE797B5F67}.Release|x64.ActiveCfg = Release|x64
 		{DDA9D911-F8CB-4A7A-AE99-7DDE797B5F67}.Release|x64.Build.0 = Release|x64
-		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Debug|x64.Build.0 = Debug|Any CPU
-		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Release|x64.ActiveCfg = Release|Any CPU
-		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Release|x64.Build.0 = Release|Any CPU
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Debug|x64.ActiveCfg = Debug|x64
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Debug|x64.Build.0 = Debug|x64
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Release|x64.ActiveCfg = Release|x64
+		{1018C0D5-4379-4D9A-AD74-29F4FB497452}.Release|x64.Build.0 = Release|x64
 		{2983527B-47C0-4DB9-923B-C5C3A5E02B69}.Debug|x64.ActiveCfg = Debug|x64
 		{2983527B-47C0-4DB9-923B-C5C3A5E02B69}.Debug|x64.Build.0 = Debug|x64
 		{2983527B-47C0-4DB9-923B-C5C3A5E02B69}.Release|x64.ActiveCfg = Release|x64
