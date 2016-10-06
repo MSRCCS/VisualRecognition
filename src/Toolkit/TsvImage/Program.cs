@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,8 +9,11 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using System.Diagnostics;
+using System.Drawing;
 using CmdParser;
 using CEERecognition;
+using TsvTool.Utility;
+using MCFeatureLib;
 
 namespace TsvImage
 {
@@ -198,6 +201,93 @@ namespace TsvImage
             }
         }
 
+        class ArgsFilterRGBA
+        {
+            [Argument(ArgumentType.Required, HelpText = "Input TSV file")]
+            public string inTsv = null;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Output TSV file (default: replace inTsv .ext with .rgba.tsv)")]
+            public string outTsv = null;
+            [Argument(ArgumentType.Required, HelpText = "Column index for image data")]
+            public int image = -1;
+        }
+        static void FilterRGBA(ArgsFilterRGBA cmd)
+        {
+            if (cmd.outTsv == null)
+                cmd.outTsv = Path.ChangeExtension(cmd.inTsv, ".rgba.tsv");
+
+            var lines = File.ReadLines(cmd.inTsv)
+                .ReportProgress("Lines processed")
+                .AsParallel().AsOrdered()
+                .Select(line => line.Split('\t'))
+                .Where(cols => 
+                {
+                    using (var ms = new MemoryStream(Convert.FromBase64String(cols[cmd.image])))
+                    using (var bmp = new Bitmap(ms))
+                    {
+                        if (bmp.PixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb)
+                        {
+                            float mean = 0;
+                            for (int y = 0; y < bmp.Height; y++)
+                                for (int x = 0; x < bmp.Width; x++)
+                                {
+                                    var c = bmp.GetPixel(x, y);
+                                    mean += c.A;
+                                }
+                            mean /= bmp.Width * bmp.Height;
+                            if (mean < 250)
+                                return true;
+                            // if mean > 250, the image may be just a 32bpp image without transparent area
+                            return false;
+                        }
+                    }
+                    return false;
+                })
+                .Select(cols => string.Join("\t", cols));
+
+            File.WriteAllLines(cmd.outTsv, lines);
+            Console.WriteLine("Done.");
+        }
+
+        class ArgsExtractDupFeature
+        {
+            [Argument(ArgumentType.Required, HelpText = "Input TSV file")]
+            public string inTsv = null;
+            [Argument(ArgumentType.Required, HelpText = "Column index for image data")]
+            public int image = -1;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Duplicate feature name (default: 8x8_EDH2x2_WH)")]
+            public string feature = "8x8_EDH2x2_WH";
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Output TSV file (default: replace inTsv .ext with .8x8_EDH2x2_WH.tsv), with image column replaced by feature")]
+            public string outTsv = null;
+        }
+        static void ExtractDupFeature(ArgsExtractDupFeature cmd)
+        {
+            if (cmd.outTsv == null)
+                cmd.outTsv = Path.ChangeExtension(cmd.inTsv, string.Format(".{0}.tsv", cmd.feature));
+
+            int dim = MCFeatureExtractor.GetFeatureDim(cmd.feature);
+            var lines = File.ReadLines(cmd.inTsv)
+                .ReportProgress("Lines processed")
+                .AsParallel().AsOrdered()
+                .Select(line => line.Split('\t').ToList())
+                .Select(cols =>
+                {
+                    using (var ms = new MemoryStream(Convert.FromBase64String(cols[cmd.image])))
+                    using (var bmp = new Bitmap(ms))
+                    {
+                        var f = new float[dim];
+                        MCFeatureExtractor.ExtrFeature(cmd.feature, bmp, f);
+                        byte[] fea = new byte[f.Length * sizeof(float)];
+                        Buffer.BlockCopy(f, 0, fea, 0, fea.Length);
+                        cols.Add(Convert.ToBase64String(fea));
+                    }
+                    return cols;
+                })
+                .Select(cols => string.Join("\t", cols));
+
+            File.WriteAllLines(cmd.outTsv, lines);
+            Console.WriteLine("Done.");
+        }
+
         static void Main(string[] args)
         {
             ParserX.AddTask<ArgsRank>(Rank, "Rank faces in TSV file");
@@ -215,7 +305,8 @@ namespace TsvImage
             ParserX.AddTask<ArgsCeleb>(Celeb, "Celebrity selection");
             ParserX.AddTask<ArgsCelebRemove>(CelebRemove, "Celebrity removal for ancient people");
             ParserX.AddTask<ArgsCeleb2Phase>(Celeb2Phase, "Divide celebrities into multiple phrases");
-            ParserX.AddTask<ArgsClassVariance>(ClassVariance, "Calculate class variance");
+            ParserX.AddTask<ArgsClassVariance>(ClassVariance, "Calculate class variance (for data clean)");
+            ParserX.AddTask<ArgsClassMeanVar>(ClassMeanVar, "Calculate class mean and variance");
             ParserX.AddTask<ArgsParseResult>(ParseResult, "Parse Caffe evaluation result for accuracy per class");
             ParserX.AddTask<ArgsViewCheck>(ViewCheck, "Data repo view check");
             ParserX.AddTask<ArgsView2Data>(View2Data, "Data repo view to data");
@@ -223,7 +314,9 @@ namespace TsvImage
             ParserX.AddTask<ArgsImageScale>(ImageScale, "Generate multiple images by down scaling");
             ParserX.AddTask<ArgsCheckCoverage>(CheckCoverage, "Parse Caffe evaluation result for false alarm or detection rate");
             ParserX.AddTask<ArgsFindSatoriID>(FindSatoriID, "given a entity name string, find its corresponding satoriID");
-
+            ParserX.AddTask<ArgsFilterRGBA>(FilterRGBA, "Filter rgba images with transparent background");
+            ParserX.AddTask<ArgsExtractDupFeature>(ExtractDupFeature, "Extract dup detection feature");
+            ParserX.AddTask<ArgsDedup>(Dedup, "Pairwise dedup within each group");
             if (ParserX.ParseArgumentsWithUsage(args))
             {
                 Stopwatch timer = Stopwatch.StartNew();
