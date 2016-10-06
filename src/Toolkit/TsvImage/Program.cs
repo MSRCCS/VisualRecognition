@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -313,6 +313,7 @@ namespace TsvImage
             ParserX.AddTask<ArgsWrongCeleb>(WrongCeleb, "Detect wrong celebs based on the prediction result");
             ParserX.AddTask<ArgsImageScale>(ImageScale, "Generate multiple images by down scaling");
             ParserX.AddTask<ArgsCheckCoverage>(CheckCoverage, "Parse Caffe evaluation result for false alarm or detection rate");
+            ParserX.AddTask<ArgsFindSatoriID>(FindSatoriID, "given a entity name string, find its corresponding satoriID");
             ParserX.AddTask<ArgsFilterRGBA>(FilterRGBA, "Filter rgba images with transparent background");
             ParserX.AddTask<ArgsExtractDupFeature>(ExtractDupFeature, "Extract dup detection feature");
             ParserX.AddTask<ArgsDedup>(Dedup, "Pairwise dedup within each group");
