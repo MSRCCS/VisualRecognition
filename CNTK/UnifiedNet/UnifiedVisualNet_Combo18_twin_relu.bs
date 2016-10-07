@@ -1,0 +1,179 @@
+# Brainscript image trainer. 
+
+
+    ImageW = 224
+    ImageH = 224
+    ImageC = 3
+    labelDim = 1000
+
+    features = Input((ImageW: ImageH: ImageC), tag = "feature")
+    labels = Input(labelDim, tag = "label")
+    
+    # Kernels width and height.
+    kW = 3
+    kH = 3
+    # Kernel stride.
+    hs = 1
+    vs = 1
+	hs2 = 2
+	vs2 = 2
+    
+    # Pooling settings.
+    poolW = 2
+    poolH = 2
+    poolhs = 2
+    poolvs = 2
+    
+    # Initial parameter values.
+    convWScale = 7.07
+    convBValue = 0
+    scValue = 0.03
+    fc1WScale = 3.0
+    fc1BValue = 1
+    fc2WScale = 3.0
+    fc2BValue = 1
+    fc3WScale = 1.0
+    fc3BValue = 1
+	bnTimeConst = 32768
+	fcWScale = 1.13
+    fcBValue = 0
+	
+	Conv(W, inp, outMap,inMap, inWCount, kW, kH, hStride, vStride) =
+[
+    c = Convolution(W, inp, (kW:kH:inMap), mapDims = outMap, stride = (hStride:vStride:inMap), 
+	autoPadding = true, imageLayout = "cudnn")
+].c
+
+BN(inp, mapCount, bValue, scValue, bnTimeConst) = 
+[
+    b = Parameter(mapCount, 1, init = "fixedValue", value = bValue)
+    sc = Parameter(mapCount, 1, init = "fixedValue", value = scValue)
+    m = Parameter(mapCount, 1, init = "fixedValue", value = 0, learningRateMultiplier = 0)
+    v = Parameter(mapCount, 1, init = "fixedValue", value = 0, learningRateMultiplier = 0)
+    y = BatchNormalization(inp, sc, b, m, v, true, normalizationTimeConstant = bnTimeConst, epsilon = 0.000000001, imageLayout = "cudnn")
+].y
+
+ConvBNLayerW(W, inp,outMap,inMap, kW, kH, hStride, vStride, bValue, scValue, bnTimeConst) =
+[
+	inWCount = inMap * kW * kH
+    c = Conv(W, inp,outMap, inMap,inWCount,  kW, kH, hStride, vStride)
+    y = BN(c, outMap, bValue, scValue, bnTimeConst)
+].y
+# One core layer of TwinResNetRelu, 
+# inp: input tensor
+# outMap: channels of output tensor
+# inMap: channels of input tensor
+ConvBNLayer(inp, outMap,inMap, kW, kH, hStride, vStride, wScale, bValue, scValue, bnTimeConst) =
+[
+	inWCount = kW * kH * inMap
+    W = Parameter(outMap, inWCount, init = "gaussian", initValueScale = wScale)
+    c = Conv(W, inp, outMap,inMap, inWCount, kW, kH, hStride, vStride)
+    y = BN(c, outMap, bValue, scValue, bnTimeConst)
+].y
+# One core layer of TwinResNetRelu, 
+# inp: input tensor
+# outMap: channels of output tensor
+# inMap: channels of input tensor
+ConvBNReLULayer(inp, outMap,inMap, kW, kH, hStride, vStride, wScale, bValue, scValue, bnTimeConst) =
+[
+    outMap2 = outMap / 2
+    c = ConvBNLayer(inp, outMap2,inMap, kW, kH, hStride, vStride, wScale, bValue, scValue, bnTimeConst)
+	c2 = c * -1 
+	c3 = Splice(c: c2, axis=3)
+	y = RectifiedLinear(c3)
+	
+].y
+
+Conv1x1(inp, outMap, inMap, hStride, vStride, wScale, bValue, scValue, bnTimeConst) = 
+[
+    W = Parameter(outMap, inMap, init = "gaussian", initValueScale = wScale)
+	c = Convolution(W, inp, (1:1:inMap), mapDims = outMap, stride = (hStride:vStride:inMap), 	autoPadding = false, imageLayout = "cudnn")
+    y = BN(c, outMap, bValue, scValue, bnTimeConst)
+].y
+
+DnnLayer(hiddenDim, labelDim, x, wScale, bValue)=
+[
+    W = Parameter(labelDim, hiddenDim, init = "gaussian", initValueScale = wScale)
+    b = Parameter(labelDim,1, init = "fixedValue", value = bValue)
+    t = Times(W, x)
+    z = Plus(t, b)
+].z
+# One core layer of TwinResNetRelu, 
+# inp: input tensor
+# outMap: channels of output tensor
+# inMap: channels of input tensor
+TwinResNetReluNode2A(inp, outMap, inMap, kW, kH, wScale, bValue, scValue) = 
+[
+    # First convolution layer.
+    c1 = ConvBNReLULayer(inp, outMap, inMap, kW, kH, 1, 1, wScale, bValue, scValue, bnTimeConst)
+    # Second convolution layer, no ReLU.
+	outMap2 = outMap / 2
+    c2 = ConvBNLayer(c1, outMap2, outMap, kW, kH, 1, 1, wScale, bValue, scValue, bnTimeConst)
+	c3 = c2 * -1
+	c4 = Splice( c2: c3, axis=3)
+    # Identity shortcut.
+    p = Plus(c4, inp)
+    y = RectifiedLinear(p)
+].y
+
+ResNetNode2BInc(inp, outMap, inMap, kW, kH, wScale, bValue, scValue ) = 
+[
+    # First convolution layer.
+    c1 = ConvBNReLULayer(inp, outMap, inMap, kW, kH, 1, 1, wScale, bValue, scValue, bnTimeConst)
+	outMap2 = outMap / 2
+    # Second convolution layer, no ReLU.
+    c2 = ConvBNLayer(c1, outMap2, outMap, kW, kH, 2, 2, wScale, bValue, scValue, bnTimeConst)
+    
+    # Projection convolution layer.
+    c_proj = Conv1x1(inp, outMap2, inMap, 2, 2, wScale, bValue, scValue, bnTimeConst)
+    
+    p = Plus(c2, c_proj)
+	p1 = p * -1
+	p2 = Splice( p: p1, axis=3 )
+    y2 = RectifiedLinear(p2)
+].y2
+
+	# Convolution layer 1, 
+	# Output is a feature of dim 112x112x128
+	conv1WScale = 0.6
+    cMap1 = 128
+    conv1 = ConvBNReLULayer(features, cMap1, 3, 7, 7, 2, 2, conv1WScale, convBValue, scValue, bnTimeConst)
+	# 112x112x128 (+,-)
+	first1W = 3
+    first1H = first1W
+    pool1hs = 2
+    pool1vs = pool1hs
+    # pool1 = Pooling(conv1, "max", (first1W: first1H: cMap1), stride = (pool1hs:pool1vs:cMap1), autoPadding = (true: true: false), imageLayout = "cudnn")
+	pool1 = MaxPooling(conv1, 3, 3, 2, 2, imageLayout = "cudnn")
+	# 56x56x256 (+,-)
+	rn1_1 = TwinResNetReluNode2A( pool1, cMap1, cMap1, kW, kH, convWScale, convBValue, scValue)
+	rn1_2 = TwinResNetReluNode2A( rn1_1, cMap1, cMap1, kW, kH, convWScale, convBValue, scValue)
+    cMap2 = 256 
+	rn2_1 = ResNetNode2BInc( rn1_2, cMap2, cMap1, kW, kH, convWScale, convBValue, scValue)
+	rn2_2 = TwinResNetReluNode2A( rn2_1, cMap2, cMap2, kW, kH, convWScale, convBValue, scValue)
+	cMap3 = 512
+	rn3_1 = ResNetNode2BInc( rn2_2, cMap3, cMap2, kW, kH, convWScale, convBValue, scValue)
+	# 14x14x512 (+,-)
+	rn3_2 = TwinResNetReluNode2A( rn3_1, cMap3, cMap3, kW, kH, convWScale, convBValue, scValue)
+	cMap4 = 1024
+	rn4_1 = ResNetNode2BInc( rn3_2, cMap4, cMap3, kW, kH, convWScale, convBValue, scValue)
+	rn4_2 = TwinResNetReluNode2A( rn4_1, cMap4, cMap4, kW, kH, convWScale, convBValue, scValue)
+	rn4_3 = TwinResNetReluNode2A( rn4_2, cMap4, cMap4, kW, kH, convWScale, convBValue, scValue)
+	# 7x7x1024
+    # level 4
+	pool4W = 7
+	pool4H = 7
+	# dim: 1024
+	pool4a = AveragePooling( rn4_1, pool4W, pool4H, 1, 1, imageLayout = "cudnn")
+	pool4b = AveragePooling( rn4_2, pool4W, pool4H, 1, 1, imageLayout = "cudnn")
+	pool4c = AveragePooling( rn4_3, pool4W, pool4H, 1, 1, imageLayout = "cudnn")
+
+    poolFinal = Splice(pool4a:pool4b:pool4c, axis=3)
+	cMapFinal = 1024 * 3 
+	
+    ol = DnnLayer(cMapFinal, labelDim, poolFinal, fcWScale, fcBValue)
+
+    CE = CrossEntropyWithSoftmax(labels, ol, tag = "criterion")
+    Err = ClassificationError(labels, ol, tag = "evaluation")
+    OutputNodes = ol
+
