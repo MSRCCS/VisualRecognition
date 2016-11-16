@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -44,7 +45,7 @@ namespace TsvImage
 
             var topImpression = File.ReadLines(cmd.sidInTopImpression)
                 .Select(line => line.Split('\t'))
-                .Select(cols => 
+                .Select(cols =>
                 {
                     string sid = cols[0].Substring("http://knowledge.microsoft.com/".Length);
                     string name;
@@ -79,12 +80,12 @@ namespace TsvImage
 
         }
 
-         class ArgsCelebRemove
+        class ArgsCelebRemove
         {
             [Argument(ArgumentType.Required, HelpText = "Entity info with date of birth info")]
             public string entityInfo = null;
         }
-        
+
         static void CelebRemove(ArgsCelebRemove cmd)
         {
             var black_list = File.ReadLines(cmd.entityInfo)
@@ -178,20 +179,27 @@ namespace TsvImage
                     var var_all = CalcVariance(g.AsEnumerable(), mean_all, x => x.f);
 
                     var dist_array = g.AsEnumerable()
-                        .Select(x => 
+                        .Select(x =>
                         {
                             var dis = (float)Math.Sqrt(Distance.L2Distance(mean20_cleaned, x.f));
                             return var20_cleaned + "\t" + dis + "\t" + (dis < cmd.thresh);
                         })
                         .ToArray();
 
-                    return new {key = g.Key, var20_cleaned = var20_cleaned, n_top20_cleaned = top20_cleaned.Count(), 
-                                var_all = var_all, total = g.Count(), dist_array = dist_array};
+                    return new
+                    {
+                        key = g.Key,
+                        var20_cleaned = var20_cleaned,
+                        n_top20_cleaned = top20_cleaned.Count(),
+                        var_all = var_all,
+                        total = g.Count(),
+                        dist_array = dist_array
+                    };
                 })
                 .ToList();
 
             File.WriteAllLines(cmd.outTsv, variances.OrderBy(x => x.var20_cleaned)
-                    .Select(x => x.key + "\t" + x.var20_cleaned + "\t" + x.n_top20_cleaned 
+                    .Select(x => x.key + "\t" + x.var20_cleaned + "\t" + x.n_top20_cleaned
                         + "\t" + x.var_all + "\t" + x.total));
 
             var lines = variances.SelectMany(x => x.dist_array);
@@ -258,14 +266,17 @@ namespace TsvImage
             public int max = 500;
             [Argument(ArgumentType.AtMostOnce, HelpText = "Min data per class (default: 0)")]
             public int min = 0;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "If the same class label appears in different views, only use the data in first view, or merge them (default=fase)")]
+            public bool merge = false;
+
         }
 
-        static Dictionary<string, int> SelectSid(ArgsViewCheck cmd)
+        static ConcurrentDictionary<string, int> SelectSid(ArgsViewCheck cmd)
         {
             var iniParser = new FileIniDataParser();
             var iniData = iniParser.ReadFile(cmd.ini);
 
-            Dictionary<string, int> sid_selected = new Dictionary<string, int>();
+            ConcurrentDictionary<string, int> sid_selected = new ConcurrentDictionary<string, int>();
 
             HashSet<string> global_black_list;
             string global_black_list_file;
@@ -305,12 +316,12 @@ namespace TsvImage
                         .Select(line => line.Split('\t')[0])
                         .Where(sid => !global_black_list.Contains(sid))
                         .Where(sid => !black_list.Contains(sid))
-                        .Where(sid => !sid_selected.ContainsKey(sid))
-                        .Select(sid => Tuple.Create(sid, Math.Min(cmd.max, sid_count[sid])))
+                        .Where(sid => cmd.merge || !sid_selected.ContainsKey(sid))
+                        .Select(sid => Tuple.Create(sid, Math.Min(cmd.max - (sid_selected.ContainsKey(sid) ? sid_selected[sid] : 0), sid_count[sid])))
                         .Where(tp => tp.Item2 >= cmd.min)
                         .Select(tp =>
                         {
-                            sid_selected.Add(tp.Item1, tp.Item2);
+                            sid_selected.AddOrUpdate(tp.Item1, tp.Item2, (existingID, existingCount) => existingCount + tp.Item2);
                             return tp;
                         })
                         .ToList();
@@ -331,7 +342,7 @@ namespace TsvImage
             SelectSid(cmd);
         }
 
-        class ArgsView2Data: ArgsViewCheck
+        class ArgsView2Data : ArgsViewCheck
         {
             [Argument(ArgumentType.AtMostOnce, HelpText = "Output TSV file (default: replace ini file .ext with .tsv)")]
             public string outTsv = null;
@@ -347,8 +358,7 @@ namespace TsvImage
 
             var sid_selected = SelectSid(cmd);
             var sid_count = sid_selected.ToDictionary(kv => kv.Key, kv => 0);
-
-            var sid_in_previous_sections = new HashSet<string>();
+            long total_sample_num = sid_selected.Sum(kv => kv.Value);
 
             Console.WriteLine("\nStart generating data...");
             var iniParser = new FileIniDataParser();
@@ -359,66 +369,83 @@ namespace TsvImage
 
             using (var sw_data = new StreamWriter(cmd.outTsv))
             using (var sw_label = new StreamWriter(cmd_outTsvLabel))
-            foreach (var sec in iniData.Sections)
-            {
-                Console.WriteLine("Section: {0}", sec.SectionName);
-                string data_file = sec.Keys["data_file"];
-                int image_col = Convert.ToInt32(sec.Keys["image_col"]);
-                int label_col = Convert.ToInt32(sec.Keys["label_col"]);
-
-                var sid_in_this_section = new HashSet<string>();
-                foreach (var line in File.ReadLines(data_file))
+                foreach (var sec in iniData.Sections)
                 {
-                    count++;
-                    var cols = line.Split('\t');
-                    string sid = cols[label_col];
-                    if (!sid_selected.ContainsKey(sid))
-                        continue;
-                    if (sid_count[sid] >= cmd.max)
-                        continue;
+                    Console.WriteLine("Section: {0}", sec.SectionName);
+                    string data_file = sec.Keys["data_file"];
+                    int image_col = Convert.ToInt32(sec.Keys["image_col"]);
+                    int label_col = Convert.ToInt32(sec.Keys["label_col"]);
 
-                    // if sid has been used in previous sections, skip it
-                    if (sid_in_previous_sections.Contains(sid))
-                        continue;
+                    HashSet<string> black_list;
+                    string black_list_file = sec.Keys["black_list"];
+                    if (string.IsNullOrEmpty(black_list_file))
+                        black_list = new HashSet<string>();
+                    else
+                        black_list = new HashSet<string>(File.ReadLines(black_list_file)
+                                            .Select(line => line.Split('\t')[0])
+                                            .Distinct(),
+                                            StringComparer.Ordinal);
+                    bool has_blacklist = black_list.Count() > 0;
+
+                    HashSet<string> white_list;
+                    string white_list_file = sec.Keys["white_list"];
+                    if (string.IsNullOrEmpty(white_list_file))
+                        white_list = new HashSet<string>();
+                    else
+                        white_list = new HashSet<string>(File.ReadLines(white_list_file)
+                                            .Select(line => line.Split('\t')[0])
+                                            .Distinct(),
+                                            StringComparer.Ordinal);
+                    bool has_whitelist = white_list.Count() > 0;
                     
-                    sid_in_this_section.Add(sid);
-
-                    sid_count[sid] = sid_count[sid] + 1;
-
-                    try
+                    var sid_in_this_section = new HashSet<string>();
+                    foreach (var line in File.ReadLines(data_file))
                     {
-                        string img_string;
-                        if (cmd.size > 0)
+                        count++;
+                        var cols = line.Split('\t');
+                        string sid = cols[label_col];
+                        if (!sid_selected.ContainsKey(sid))
+                            continue;
+                        if (has_whitelist && !white_list.Contains(sid))
+                            continue;
+                        if (has_blacklist && black_list.Contains(sid))
+                            continue;
+                        if (sid_selected[sid] <= 0)
+                            continue;
+                        
+                        try
                         {
-                            using (var ms = new MemoryStream(Convert.FromBase64String(cols[image_col])))
-                            using (var bmp = new Bitmap(ms))
+                            string img_string;
+                            if (cmd.size > 0)
                             {
-                                Bitmap img = ImageUtility.DownsizeImage(bmp, cmd.size);
-                                byte[] img_buf = ImageUtility.SaveImageToJpegInBuffer(img, 90L);
-                                img_string = Convert.ToBase64String(img_buf);
+                                using (var ms = new MemoryStream(Convert.FromBase64String(cols[image_col])))
+                                using (var bmp = new Bitmap(ms))
+                                {
+                                    Bitmap img = ImageUtility.DownsizeImage(bmp, cmd.size);
+                                    byte[] img_buf = ImageUtility.SaveImageToJpegInBuffer(img, 90L);
+                                    img_string = Convert.ToBase64String(img_buf);
+                                }
                             }
+                            else
+                                img_string = cols[image_col];
+
+                            sw_data.WriteLine("{0}\t{1}", sid, img_string);
+                            sw_label.WriteLine(sid);
+                            count_saved++;
+                            sid_selected[sid]--;
+                            Console.Write("Lines processed: {0}, saved: {1}({2:P})\r", count, count_saved, (float)count_saved/total_sample_num);
                         }
-                        else
-                            img_string = cols[image_col];
+                        catch
+                        {
+                            Console.WriteLine("\nError in reading image stream (col:{0}): {1}",
+                                image_col, cols[image_col].Substring(0, Math.Min(50, cols[image_col].Length)));
+                        }
+                    }
 
-                        sw_data.WriteLine("{0}\t{1}", sid, img_string);
-                        sw_label.WriteLine(sid);
-                        count_saved++;
-                        Console.Write("Lines processed: {0}, saved: {1}\r", count, count_saved);
-                    }
-                    catch
-                    {
-                        Console.WriteLine("\nError in reading image stream (col:{0}): {1}", 
-                            image_col, cols[image_col].Substring(0, Math.Min(50, cols[image_col].Length)));
-                    }
+                    Console.WriteLine();
                 }
-
-                foreach (var sid in sid_in_this_section)
-                    sid_in_previous_sections.Add(sid);
-
-                Console.WriteLine();
-            }
-
+            Trace.Assert(sid_selected.Sum(tp => tp.Value) == 0);
+            Trace.Assert(count_saved == total_sample_num);                
         }
 
         class ArgsWrongCeleb
@@ -433,6 +460,12 @@ namespace TsvImage
             public int predict = -1;
             [Argument(ArgumentType.AtMostOnce, HelpText = "Confidence threshold for wrong entity (default: 0.8)")]
             public float conf = 0.8f;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "white list file for label, the samples with class labels in column#0 will be treated as correctly classified")]
+            public string whiteListTsv = null;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "black list file for prediction, the samples with prediction in column#0 will be treated as correctly classified")]
+            public string blackListTsv = null;
+
+
         }
 
         static void WrongCeleb(ArgsWrongCeleb cmd)
@@ -440,6 +473,30 @@ namespace TsvImage
             if (cmd.outTsv == null)
                 cmd.outTsv = Path.ChangeExtension(cmd.inTsv, ".wrong.stat.tsv");
 
+            HashSet<string> setLabelWhiteList;
+            if (string.IsNullOrEmpty(cmd.whiteListTsv))
+                setLabelWhiteList = new HashSet<string>();
+            else
+            {
+                setLabelWhiteList = new HashSet<string>(File.ReadLines(cmd.whiteListTsv)
+                                    .Select(line => line.Split('\t')[0].Trim().ToLower())
+                                    .Distinct(),
+                                    StringComparer.OrdinalIgnoreCase);
+                Console.WriteLine("Loaded {0} entries from white list file for labels {1}", setLabelWhiteList.Count(), cmd.whiteListTsv);
+            }
+
+            HashSet<string> setPredictionBlackList;
+            if (string.IsNullOrEmpty(cmd.whiteListTsv))
+                setPredictionBlackList = new HashSet<string>();
+            else
+            {
+                setPredictionBlackList = new HashSet<string>(File.ReadLines(cmd.whiteListTsv)
+                                    .Select(line => line.Split('\t')[0].Trim().ToLower())
+                                    .Distinct(),
+                                    StringComparer.OrdinalIgnoreCase);
+                Console.WriteLine("Loaded {0} entries from black list file for predictions {1}", setPredictionBlackList.Count(), cmd.blackListTsv);
+            }
+            
             var predictions = File.ReadLines(cmd.inTsv)
                 .ReportProgress("Lines processed")
                 .Select(line => line.Split('\t'))
@@ -451,15 +508,19 @@ namespace TsvImage
                 {
                     string ground_true = tp.Item1;
                     string wrong = "Unknown";
+                    if (setLabelWhiteList.Contains(ground_true, StringComparer.OrdinalIgnoreCase))
+                        return wrong;
                     var predicts = tp.Item2.Split(';');
-                    if (!string.IsNullOrEmpty(tp.Item2) && predicts.Length > 0)
+                    if(!string.IsNullOrEmpty(tp.Item2) && predicts.Length > 0)
                     {
                         var pred = predicts.First().Split(':');
+                        if (setPredictionBlackList.Contains(pred[0], StringComparer.OrdinalIgnoreCase))
+                            return wrong;
                         float conf = Convert.ToSingle(pred[1]);
                         if (conf > cmd.conf && string.CompareOrdinal(pred[0], ground_true) != 0)
                             wrong = predicts.First();
                     }
-                    return wrong; 
+                    return wrong;
                 });
 
             File.WriteAllLines(Path.ChangeExtension(cmd.inTsv, ".wrong.tsv"), wrongs);
@@ -477,16 +538,21 @@ namespace TsvImage
                         .Where(cols => cols.Length > 0)
                         .Select(cols => cols[0].Split(':'))
                         .Select(pred => new { cls = pred[0], conf = Convert.ToSingle(pred[1]) })
+                        .Where(pred => !setPredictionBlackList.Contains(pred.cls, StringComparer.OrdinalIgnoreCase))
                         .Where(pred => pred.conf > cmd.conf && string.CompareOrdinal(pred.cls, ground_true) != 0)
                         .GroupBy(pred => pred.cls)
-                        .Select(g_pred => new { cls = g_pred.Key, num = g_pred.Count()})
+                        .Select(g_pred => new { cls = g_pred.Key, num = g_pred.Count() })
                         .OrderByDescending(x => x.num)
                         .ToArray();
                     int num_wrong = wrong.Sum(x => x.num);
-                    return Tuple.Create(g.Key, (float)num_wrong / g.Count(), g.Count(), num_wrong, string.Join(";", wrong.Select(x => x.cls + ":" + x.num)));
+                    float wrong_ratio = (float)num_wrong / g.Count();
+                    if (setLabelWhiteList.Contains(ground_true, StringComparer.OrdinalIgnoreCase))
+                        wrong_ratio = 0.0f;
+                    return Tuple.Create(g.Key, wrong_ratio , g.Count(), num_wrong, string.Join(";", wrong.Select(x => x.cls + ":" + x.num)));
                 })
                 .Where(tp => tp.Item4 > 0)
                 .OrderByDescending(tp => tp.Item2)
+                .ThenByDescending(tp => tp.Item3)
                 .Select(tp => tp.Item1 + "\t" + tp.Item2 + "\t" + tp.Item3 + "\t" + tp.Item4 + "\t" + tp.Item5);
 
             File.WriteAllLines(cmd.outTsv, lines);
