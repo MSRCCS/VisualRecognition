@@ -21,11 +21,11 @@ namespace TsvImage
             public string inTsv = null;
             [Argument(ArgumentType.AtMostOnce, HelpText = "label map TSV file, which contains the Label-->ClassID map, a sample is covered if this map contains predicted label ")]
             public string inTsvLabel = null;
-            [Argument(ArgumentType.Required, HelpText = "Output TSV file for recognition summary")]
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Output TSV file for recognition summary, default: inputTSV.result.tsv")]
             public string outTsv = null;
-            [Argument(ArgumentType.AtMostOnce, HelpText = "Column index for prob data in data file, start from 0")]
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Column index for prob data in data file, start from 0, default=8")]
             public int dataCol = 8;
-            [Argument(ArgumentType.AtMostOnce, HelpText = "Confidence threshold")]
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Confidence threshold, default=0")]
             public float thresh = 0;
             [Argument(ArgumentType.AtMostOnce, HelpText = "The recognition prob data is Base64 encoded (floats X (# of classes)) or not ( Label1:conf1;Label2:conf2;...)")]
             public bool encodedFeature = false;
@@ -91,11 +91,14 @@ namespace TsvImage
                     var result = Tuple.Create(recognized, correct);
                     return result;
                 })
-                .Select(x => string.Format("{0}\t{1}", x.Item1, x.Item2));
-
-            string outTsv = (cmd.outTsv == "")?Path.ChangeExtension(cmd.outTsv, "result.tsv"):cmd.outTsv; 
-            File.WriteAllText(outTsv, string.Format("IsRecognized\tIsCorrect\r\n"));
-            File.AppendAllLines(outTsv, lines);
+                .Select(x => string.Format("{0}\t{1}\t{2}", x.Item1, x.Item2, (x.Item1&&(!x.Item2))));
+                //Item1: recognized, i.e. wether the confidence >= threshold
+                //Item2: correct predict, i.e. the predicted label is covered ( in the provided label map )
+                //Item3: wrong predict, i.e. the predicted label is not in the provided lable map, and the confidence >= threshold
+            
+            string outTsv = string.IsNullOrEmpty(cmd.outTsv)?Path.ChangeExtension(cmd.inTsv, "result.tsv"):cmd.outTsv; 
+            File.WriteAllLines(outTsv, lines);
+            File.AppendAllText(outTsv, string.Format("IsRecognized(conf>thresh)\tIsObject(found in labelmap)\tRecognizedAsNonObject\r\n"));
             File.AppendAllText(outTsv,
                 string.Format("Total sample number: {0}\r\nrecognized (i.e. Confidence>Threshold {5}): {1}\r\nCorrect(i.e. predicted classID in label map {6}): {2}\r\nCoverage rate: {3}\r\nPrecision rate: {4}\r\nConfidence Threshold: {5}\r\n",
                 count_total, count_total_recognized, count_total_correct, 
