@@ -49,6 +49,7 @@
     <Compile Include="Dedup.cs" />
     <Compile Include="Distance.cs" />
     <Compile Include="CelebSelection.cs" />
+    <Compile Include="Map.cs" />
     <Compile Include="FindSatoriID.cs" />
     <Compile Include="ImageTransform.cs" />
     <Compile Include="LFW.cs" />

@@ -317,6 +317,8 @@ namespace TsvImage
             ParserX.AddTask<ArgsFilterRGBA>(FilterRGBA, "Filter rgba images with transparent background");
             ParserX.AddTask<ArgsExtractDupFeature>(ExtractDupFeature, "Extract dup detection feature");
             ParserX.AddTask<ArgsDedup>(Dedup, "Pairwise dedup within each group");
+            ParserX.AddTask<ArgsMap>(Map, "map a column according to a dictionary");
+
             if (ParserX.ParseArgumentsWithUsage(args))
             {
                 Stopwatch timer = Stopwatch.StartNew();
