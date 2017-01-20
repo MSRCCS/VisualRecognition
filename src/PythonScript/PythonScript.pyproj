@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{e11a9c50-2090-4c98-badf-1920226bc074}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>00.PredictionProcessing.py</StartupFile>
+    <StartupFile>FilterEvalResult.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -13,6 +13,9 @@
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <InterpreterId />
     <InterpreterVersion />
+    <CommandLineArguments>C:\data\LandmarkG\evaluate\landmark250_google.out.evaluate.byGT5.tsv C:\data\LandmarkG\evaluate\landmark250_google.out.evaluate.byGT5.Yes.try.tsv</CommandLineArguments>
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -22,6 +25,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="00.PredictionProcessing.py" />
+    <Compile Include="DeployCaffeModel.py" />
+    <Compile Include="FilterEvalResult.py" />
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
