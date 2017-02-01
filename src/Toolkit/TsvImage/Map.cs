@@ -31,7 +31,8 @@ namespace TsvImage
                         Console.Write("processed lines: {0}\r", x);
                         return line.Split('\t');
                     })
-                    .ToDictionary(cols => cols[0], cols => cols[1]);
+                    .GroupBy(cols => cols[0], StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(g => g.Key, g => g.First()[1], StringComparer.OrdinalIgnoreCase);
             Console.WriteLine("Loaded {0} entries from dictionary file {1}", dict.Count(), cmd.dictTsv);
 
             var args_inTsv = cmd.inTsv.Split('?');
@@ -63,7 +64,7 @@ namespace TsvImage
             string outTsv = (cmd.outTsv == "") ? Path.ChangeExtension(cmd.inTsv, "mapped.tsv") : cmd.outTsv;
             File.WriteAllLines(outTsv, lines);
             Console.WriteLine("\n# of Lines:\t{0}", count);
-            Console.WriteLine("\n# of lines mapped:\t{0}", count_mapped);
+            Console.WriteLine("# of lines mapped:\t{0}", count_mapped);
         }
     }
 }
