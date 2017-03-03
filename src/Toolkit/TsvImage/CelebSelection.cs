@@ -178,11 +178,14 @@ namespace TsvImage
                     var mean_all = CalcMean(g.AsEnumerable(), x => x.f);
                     var var_all = CalcVariance(g.AsEnumerable(), mean_all, x => x.f);
 
+                    var total_selected = 0;
                     var dist_array = g.AsEnumerable()
                         .Select(x =>
                         {
                             var dis = (float)Math.Sqrt(Distance.L2Distance(mean20_cleaned, x.f));
-                            return var20_cleaned + "\t" + dis + "\t" + (dis < cmd.thresh);
+                            var select = dis < cmd.thresh;
+                            if (select) total_selected++;
+                            return var20_cleaned + "\t" + dis + "\t" + select;
                         })
                         .ToArray();
 
@@ -193,6 +196,7 @@ namespace TsvImage
                         n_top20_cleaned = top20_cleaned.Count(),
                         var_all = var_all,
                         total = g.Count(),
+                        selected = total_selected,
                         dist_array = dist_array
                     };
                 })
@@ -200,7 +204,7 @@ namespace TsvImage
 
             File.WriteAllLines(cmd.outTsv, variances.OrderBy(x => x.var20_cleaned)
                     .Select(x => x.key + "\t" + x.var20_cleaned + "\t" + x.n_top20_cleaned
-                        + "\t" + x.var_all + "\t" + x.total));
+                        + "\t" + x.var_all + "\t" + x.total + "\t" + x.selected));
 
             var lines = variances.SelectMany(x => x.dist_array);
             File.WriteAllLines(Path.ChangeExtension(cmd.inTsv, ".score.tsv"), lines);
@@ -486,11 +490,11 @@ namespace TsvImage
             }
 
             HashSet<string> setPredictionBlackList;
-            if (string.IsNullOrEmpty(cmd.whiteListTsv))
+            if (string.IsNullOrEmpty(cmd.blackListTsv))
                 setPredictionBlackList = new HashSet<string>();
             else
             {
-                setPredictionBlackList = new HashSet<string>(File.ReadLines(cmd.whiteListTsv)
+                setPredictionBlackList = new HashSet<string>(File.ReadLines(cmd.blackListTsv)
                                     .Select(line => line.Split('\t')[0].Trim().ToLower())
                                     .Distinct(),
                                     StringComparer.OrdinalIgnoreCase);

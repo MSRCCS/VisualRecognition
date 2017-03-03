@@ -80,9 +80,21 @@ namespace ImageAcquisition
             foreach (var x in jt.Children())
             {
                 JObject jo2 = JObject.Parse(x.ToString());
-                var murl = jo2.Property("MediaUrl").Value.ToString();
-                var purl = jo2.Property("Url").Value.ToString();
-                var title = jo2.Property("Title").Value.ToString();
+
+                JToken value_murl, value_purl, value_title;
+                string murl , purl, title;
+                murl = purl = title = "";
+                bool success_murl = jo2.TryGetValue("mediaURL", StringComparison.OrdinalIgnoreCase, out value_murl);
+                bool success_purl = jo2.TryGetValue("URL", StringComparison.OrdinalIgnoreCase, out value_purl);
+                bool success_title = jo2.TryGetValue("title", StringComparison.OrdinalIgnoreCase, out value_title);
+                if (success_murl)
+                    murl = value_murl.ToString();
+                else
+                    continue;
+                if (success_purl)
+                    purl = value_purl.ToString();
+                if (success_title)
+                    title = value_title.ToString();
                 yield return new string[] { murl, purl, title };
             }
         }
