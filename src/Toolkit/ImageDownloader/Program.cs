@@ -43,6 +43,10 @@ namespace ImageAcquisition
             {
                 using(var httpClient = new HttpClient())
                 {
+                    httpClient.DefaultRequestHeaders.Add("Accept", "text/html, application/xhtml+xml, image/jxr, */*");
+                    httpClient.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.8,zh-Hans-CN;q=0.5,zh-Hans;q=0.3");
+                    httpClient.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko");
                     httpClient.Timeout = new TimeSpan(0, 0, 15);
                     byte[] buffer = await httpClient.GetByteArrayAsync(uri);
 
