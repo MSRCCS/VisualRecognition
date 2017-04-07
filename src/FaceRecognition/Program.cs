@@ -376,12 +376,79 @@ namespace CEERecognition
             Console.WriteLine("OutTsv format: OriginalLine with ImageStream Removed, FaceId, FaceRect, FaceImageStream");
         }
 
+        class ArgsLFWCrop
+        {
+            [Argument(ArgumentType.Required, HelpText = "Input TSV file")]
+            public string inTsv = null;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Column index for image stream")]
+            public int imageCol = 2;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Output TSV file (default: replace file .ext with .face.tsv")]
+            public string outTsv = null;
+        }
+
+        static void LFWCrop(ArgsLFWCrop cmd)
+        {
+            if (cmd.outTsv == null)
+                cmd.outTsv = Path.ChangeExtension(cmd.inTsv, ".face.tsv");
+
+            string exeDir = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            string faceModelFile = Path.Combine(exeDir, "ProductCascadeJDA27ptsWithLbf.mdl");
+            FaceDetector faceDetector = new FaceDetector(faceModelFile);
+
+            Stopwatch timer = Stopwatch.StartNew();
+
+            var lines = File.ReadLines(cmd.inTsv)
+                .ReportProgress("Lines processed")
+                .AsParallel().AsOrdered()
+                .Select(line => line.Split('\t').ToList())
+                .Select(cols =>
+                {
+                    // detect face
+                    using (var ms = new MemoryStream(Convert.FromBase64String(cols[cmd.imageCol])))
+                    using (var bmp = new Bitmap(ms))
+                    {
+                        int cx = bmp.Width / 2;
+                        int cy = bmp.Height / 2;
+
+                        FaceRectLandmarks[] faces;
+                        List<Bitmap> croppedFaces;
+                        faceDetector.DetectAndCropFaces(bmp, out faces, out croppedFaces);
+                        return new { cols, faces, croppedFaces, cx, cy };
+                    }
+                })
+                .Where(x => x.faces.Length > 0)
+                .Select(x =>
+                {
+                    var centerFace = x.faces
+                        .Select((face, idx) => new {face, idx})
+                        .OrderBy(f =>
+                        {
+                            float centerX = (float)(f.face.FaceRect.Left) + f.face.FaceRect.Width / 2.0f;
+                            float centerY = (float)(f.face.FaceRect.Top) + f.face.FaceRect.Height / 2.0f;
+                            return Math.Sqrt((centerX - x.cx) * (centerX - x.cx) 
+                                    + (centerY - x.cy) * (centerY - x.cy));
+                        })
+                        .First();
+
+                    if (centerFace.idx > 0)
+                        Console.WriteLine("\n{0} face detected: {1}", x.faces.Count(), x.cols[0]);
+                    var image_buffer = TsvTool.Utility.ImageUtility.SaveImageToJpegInBuffer(x.croppedFaces[centerFace.idx]);
+                    x.cols[cmd.imageCol] = Convert.ToBase64String(image_buffer);
+                    return x.cols;
+                })
+                .Select(cols => string.Join("\t", cols));
+
+            File.WriteAllLines(cmd.outTsv, lines);
+            Console.WriteLine("\nDone.");
+        }
+
         static void Main(string[] args)
         {
             ParserX.AddTask<ArgsTest>(Test, "Test celebrity recognition from image folder or image files");
             ParserX.AddTask<ArgsTestTsv>(TestTsv, "Test celebrity recognition from TSV file");
             ParserX.AddTask<ArgsExtract>(Extract, "Extract face feature from TSV file");
             ParserX.AddTask<ArgsCropFace>(CropFace, "Detect and crop face from TSV file");
+            ParserX.AddTask<ArgsLFWCrop>(LFWCrop, "Crop faces in LFW");
             ParserX.AddTask<ArgsLDA>(Lda, "Apply LDA transformation");
             if (ParserX.ParseArgumentsWithUsage(args))
             {
