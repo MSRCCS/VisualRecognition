@@ -106,11 +106,6 @@
     </ClCompile>
     <ClCompile Include="FaceRecognition.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\caffe\MSVC\caffe.native\caffe.native.vcxproj">
-      <Project>{214f9422-476a-4b18-83a5-2e1fd5d57ac7}</Project>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
