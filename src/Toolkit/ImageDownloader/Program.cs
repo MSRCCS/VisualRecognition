@@ -81,7 +81,7 @@ namespace ImageAcquisition
                         {
                             if (!keepPng || bmp.PixelFormat != PixelFormat.Format32bppArgb)
                             {
-                                Bitmap resizedBmp = ImageUtility.DownsizeImage(bmp, maxImageSize > 0 ? maxImageSize : Int32.MaxValue);
+                                Bitmap resizedBmp = ImageUtility.DownsizeImage(bmp, maxImageSize > 0 ? maxImageSize : Int32.MaxValue, true);
                                 data = ImageUtility.SaveImageToJpegInBuffer(resizedBmp);
                                 if (!Object.ReferenceEquals(bmp, resizedBmp))
                                     resizedBmp.Dispose();

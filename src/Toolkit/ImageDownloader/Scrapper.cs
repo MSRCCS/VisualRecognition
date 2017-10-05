@@ -52,7 +52,7 @@ namespace ImageAcquisition
                 {
                     try
                     {
-                        wc.Proxy = new WebProxy("itgproxy.redmond.corp.microsoft.com");
+                        //wc.Proxy = new WebProxy("itgproxy.redmond.corp.microsoft.com");
                         result = await wc.DownloadStringTaskAsync(queryUrl);
                         retry = false;
                     }
