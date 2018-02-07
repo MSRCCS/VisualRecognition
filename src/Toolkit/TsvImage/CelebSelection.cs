@@ -291,7 +291,8 @@ namespace TsvImage
                                         .Select(line => line.Split('\t')[0])
                                         .Distinct(),
                                         StringComparer.Ordinal);
-            
+
+            int total_samples_will_be_saved = 0;
             foreach (var sec in iniData.Sections)
             {
                 Console.WriteLine("Section: {0}", sec.SectionName);
@@ -329,6 +330,12 @@ namespace TsvImage
                      max_per_class = Convert.ToInt32(max_per_class_str);
                 if (max_per_class < cmd.min)
                     Console.WriteLine("warning! max_per_class ({0}) < cmd.min ({1}), which means no data will be selected from this section.", max_per_class, cmd.min);
+
+                //each selected sample will be repeated repeat_per_sample times (i.e. virtual samples)
+                int repeat_per_sample = 1;
+                string repeat_per_sample_str = sec.Keys["repeat_per_sample"];
+                if (!string.IsNullOrWhiteSpace(repeat_per_sample_str))
+                    repeat_per_sample = Convert.ToInt32(repeat_per_sample_str);
                 
                 var sid_list = File.ReadLines(white_list_file)
                         .Select(line => line.Split('\t')[0])
@@ -345,12 +352,17 @@ namespace TsvImage
                         .ToList();
 
                 Console.WriteLine("# of entities selected: {0}", sid_list.Count());
-                Console.WriteLine("# of images selected  : {0}", sid_list.Sum(tp => tp.Item2));
+                int sample_selected_in_this_section = sid_list.Sum(tp => tp.Item2);
+                Console.WriteLine("# of images selected  : {0}", sample_selected_in_this_section);
+                int sample_will_be_saved_in_this_section = sample_selected_in_this_section * repeat_per_sample;
+                Console.WriteLine("# of images will be saved  : {0}", sample_will_be_saved_in_this_section);
+                total_samples_will_be_saved += sample_will_be_saved_in_this_section;
                 Console.WriteLine();
             }
 
             Console.WriteLine("Total # of entities: {0}", sid_selected.Count());
-            Console.WriteLine("Total # of images  : {0}", sid_selected.Sum(kv => kv.Value));
+            Console.WriteLine("Total # of images selected : {0}", sid_selected.Sum(kv => kv.Value));
+            Console.WriteLine("Total # of images will be saved (after repeat) : {0}", total_samples_will_be_saved);
 
             return sid_selected;
         }
@@ -421,6 +433,12 @@ namespace TsvImage
                     if (!string.IsNullOrWhiteSpace(max_per_class_str))
                         max_per_class = Convert.ToInt32(max_per_class_str);
 
+                    //each selected sample will be repeated repeat_per_sample times (i.e. virtual samples)
+                    int repeat_per_sample = 1;
+                    string repeat_per_sample_str = sec.Keys["repeat_per_sample"];
+                    if (!string.IsNullOrWhiteSpace(repeat_per_sample_str))
+                        repeat_per_sample = Convert.ToInt32(repeat_per_sample_str);
+                
                     ConcurrentDictionary<string, int> sid_in_this_section = new ConcurrentDictionary<string, int>();
                     foreach (var line in File.ReadLines(data_file))
                     {
@@ -452,12 +470,16 @@ namespace TsvImage
                             else
                                 img_string = cols[image_col];
 
-                            sw_data.WriteLine("{0}\t{1}", sid, img_string);
-                            sw_label.WriteLine(sid);
+                            for (int i = 0; i < repeat_per_sample; i++ )
+                            {
+                                sw_data.WriteLine("{0}\t{1}", sid, img_string);
+                                sw_label.WriteLine(sid);
+                            }
+
                             count_saved++;
                             sid_selected[sid]--;
                             sid_in_this_section.AddOrUpdate(sid, 1, (existingID, existingCount) => existingCount + 1);
-                            Console.Write("Lines processed: {0}, saved: {1}({2:P})\r", count, count_saved, (float)count_saved/total_sample_num);
+                            Console.Write("Lines processed: {0}, saved: {1}({2:P}) (repeated {3} times)\r", count, count_saved, (float)count_saved/total_sample_num, repeat_per_sample);
                         }
                         catch
                         {
