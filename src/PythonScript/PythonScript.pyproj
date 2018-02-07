@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{e11a9c50-2090-4c98-badf-1920226bc074}</ProjectGuid>
     <ProjectHome />
-    <StartupFile>FilterEvalResult.py</StartupFile>
+    <StartupFile>detData2MultiLabelData2.py</StartupFile>
     <SearchPath />
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -13,9 +13,10 @@
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <InterpreterId />
     <InterpreterVersion />
-    <CommandLineArguments>C:\data\LandmarkG\evaluate\landmark250_google.out.evaluate.byGT5.tsv C:\data\LandmarkG\evaluate\landmark250_google.out.evaluate.byGT5.Yes.try.tsv</CommandLineArguments>
+    <CommandLineArguments>-inTsv \\vig-store\d$\Shares\vigssd\tsvdata\imagenet\test.tsv -outTsv test.ml.tsv -outLabelMap labelmap.txt -col 1</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <IsWindowsApplication>False</IsWindowsApplication>
+    <Environment>PYTHONPATH=\\tnr-csgpu011\c$\users\yuxhu\src\caffe\python</Environment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
@@ -25,8 +26,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="00.PredictionProcessing.py" />
+    <Compile Include="AnalysEvaluateResults.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="detData2MultiLabelData.py" />
+    <Compile Include="detData2MultiLabelData2.py" />
+    <Compile Include="DiffEvalResult.py" />
+    <Compile Include="ReplaceString.py" />
     <Compile Include="DeployCaffeModel.py" />
+    <Compile Include="Evaluate.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="FilterEvalResult.py" />
+    <Compile Include="ToFCN.py" />
   </ItemGroup>
   <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
