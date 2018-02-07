@@ -43,7 +43,7 @@ namespace TsvImage
             int count = 0;      //# of lines in the input file
             int count_mapped = 0;  //# of lines which has been mapped
 
-            //load the dictionary file: Key \t Value
+            //load the input file: Key \t Value
             Console.WriteLine("Parsing input file {0}", cmd.inTsv);
             var lines = File.ReadLines(cmd.inTsv)
                 .AsParallel().AsOrdered()
