@@ -35,16 +35,16 @@ namespace TsvImage
         {
             int[] dupFlag = new int[featureList.Length];
             for (int i = 0; i < dupFlag.Length; i++)
-                dupFlag[i] = -1;
+                dupFlag[i] = i;
 
             for (int i = 0; i < featureList.Length; i++)
             {
-                if (dupFlag[i] >= 0)
+                if (dupFlag[i] >= 0 && dupFlag[i]!=i) 
                     continue;
 
                 for (int j = i + 1; j < featureList.Length; j++)
                 {
-                    if (dupFlag[j] >= 0)
+                    if (dupFlag[j] >= 0 && dupFlag[j]!=j)
                         continue;
 
                     float diff = Distance.L2Distance(featureList[i], featureList[j]);
@@ -78,7 +78,7 @@ namespace TsvImage
                             x.cols[cmd.feature] = dupFlag.ToString();
                             return x.cols;
                         })
-                        .Where(cols => Convert.ToInt32(cols[cmd.feature]) < 0);
+                        ;//.Where(cols => Convert.ToInt32(cols[cmd.feature]) < 0);
                     return cols_enumerable;
                 })
                 .Select(cols => string.Join("\t", cols));

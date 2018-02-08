@@ -266,8 +266,8 @@ namespace TsvImage
         {
             [Argument(ArgumentType.Required, HelpText = "Input INI file for the view of data repo")]
             public string ini = null;
-            [Argument(ArgumentType.AtMostOnce, HelpText = "Max data per class (default: 500)")]
-            public int max = 500;
+            [Argument(ArgumentType.AtMostOnce, HelpText = "Max data per class (default: no limit)")]
+            public int max = int.MaxValue;
             [Argument(ArgumentType.AtMostOnce, HelpText = "Min data per class (default: 0)")]
             public int min = 0;
             [Argument(ArgumentType.AtMostOnce, HelpText = "If the same class label appears in different views, only use the data in first view, or merge them (default=fase)")]
@@ -292,11 +292,17 @@ namespace TsvImage
                                         .Distinct(),
                                         StringComparer.Ordinal);
 
+            int total_samples_will_be_saved = 0;
             foreach (var sec in iniData.Sections)
             {
                 Console.WriteLine("Section: {0}", sec.SectionName);
                 string data_file = sec.Keys["data_file"];
                 string stat_file = Path.ChangeExtension(data_file, "stat.tsv");
+                if (!File.Exists(stat_file))
+                {
+                    int label_col = Convert.ToInt32(sec.Keys["label_col"]);
+                    Console.WriteLine("Cannot find {0} file, use 'Tsv.exe CountLabel -inTsv {1} -label {2}' to create it.", stat_file, data_file, label_col);
+                }
                 var sid_count = File.ReadLines(stat_file)
                     .Select(line => line.Split('\t'))
                     .ToDictionary(cols => cols[0], cols => Convert.ToInt32(cols[1]));
@@ -316,12 +322,27 @@ namespace TsvImage
                 if (string.IsNullOrEmpty(white_list_file))
                     white_list_file = stat_file;
 
+                //if cmd.max is not specified (i.e. no limit), use max_per_class in .ini file
+                //cmd.max has higher priority, if it is specified in command line param
+                int max_per_class = cmd.max;  
+                string max_per_class_str = sec.Keys["max_per_class"];
+                if (!string.IsNullOrWhiteSpace(max_per_class_str))
+                     max_per_class = Convert.ToInt32(max_per_class_str);
+                if (max_per_class < cmd.min)
+                    Console.WriteLine("warning! max_per_class ({0}) < cmd.min ({1}), which means no data will be selected from this section.", max_per_class, cmd.min);
+
+                //each selected sample will be repeated repeat_per_sample times (i.e. virtual samples)
+                int repeat_per_sample = 1;
+                string repeat_per_sample_str = sec.Keys["repeat_per_sample"];
+                if (!string.IsNullOrWhiteSpace(repeat_per_sample_str))
+                    repeat_per_sample = Convert.ToInt32(repeat_per_sample_str);
+                
                 var sid_list = File.ReadLines(white_list_file)
                         .Select(line => line.Split('\t')[0])
                         .Where(sid => !global_black_list.Contains(sid))
                         .Where(sid => !black_list.Contains(sid))
                         .Where(sid => cmd.merge || !sid_selected.ContainsKey(sid))
-                        .Select(sid => Tuple.Create(sid, Math.Min(cmd.max - (sid_selected.ContainsKey(sid) ? sid_selected[sid] : 0), sid_count[sid])))
+                        .Select(sid => Tuple.Create(sid, Math.Min( Math.Min(cmd.max - (sid_selected.ContainsKey(sid) ? sid_selected[sid] : 0), sid_count[sid]), max_per_class)))
                         .Where(tp => tp.Item2 >= cmd.min)
                         .Select(tp =>
                         {
@@ -331,12 +352,17 @@ namespace TsvImage
                         .ToList();
 
                 Console.WriteLine("# of entities selected: {0}", sid_list.Count());
-                Console.WriteLine("# of images selected  : {0}", sid_list.Sum(tp => tp.Item2));
+                int sample_selected_in_this_section = sid_list.Sum(tp => tp.Item2);
+                Console.WriteLine("# of images selected  : {0}", sample_selected_in_this_section);
+                int sample_will_be_saved_in_this_section = sample_selected_in_this_section * repeat_per_sample;
+                Console.WriteLine("# of images will be saved  : {0}", sample_will_be_saved_in_this_section);
+                total_samples_will_be_saved += sample_will_be_saved_in_this_section;
                 Console.WriteLine();
             }
 
             Console.WriteLine("Total # of entities: {0}", sid_selected.Count());
-            Console.WriteLine("Total # of images  : {0}", sid_selected.Sum(kv => kv.Value));
+            Console.WriteLine("Total # of images selected : {0}", sid_selected.Sum(kv => kv.Value));
+            Console.WriteLine("Total # of images will be saved (after repeat) : {0}", total_samples_will_be_saved);
 
             return sid_selected;
         }
@@ -401,8 +427,19 @@ namespace TsvImage
                                             .Distinct(),
                                             StringComparer.Ordinal);
                     bool has_whitelist = white_list.Count() > 0;
-                    
-                    var sid_in_this_section = new HashSet<string>();
+
+                    int max_per_class = cmd.max;
+                    string max_per_class_str = sec.Keys["max_per_class"];
+                    if (!string.IsNullOrWhiteSpace(max_per_class_str))
+                        max_per_class = Convert.ToInt32(max_per_class_str);
+
+                    //each selected sample will be repeated repeat_per_sample times (i.e. virtual samples)
+                    int repeat_per_sample = 1;
+                    string repeat_per_sample_str = sec.Keys["repeat_per_sample"];
+                    if (!string.IsNullOrWhiteSpace(repeat_per_sample_str))
+                        repeat_per_sample = Convert.ToInt32(repeat_per_sample_str);
+                
+                    ConcurrentDictionary<string, int> sid_in_this_section = new ConcurrentDictionary<string, int>();
                     foreach (var line in File.ReadLines(data_file))
                     {
                         count++;
@@ -414,7 +451,7 @@ namespace TsvImage
                             continue;
                         if (has_blacklist && black_list.Contains(sid))
                             continue;
-                        if (sid_selected[sid] <= 0)
+                        if (sid_selected[sid] <= 0 || (sid_in_this_section.ContainsKey(sid) && sid_in_this_section[sid] == max_per_class))
                             continue;
                         
                         try
@@ -433,11 +470,16 @@ namespace TsvImage
                             else
                                 img_string = cols[image_col];
 
-                            sw_data.WriteLine("{0}\t{1}", sid, img_string);
-                            sw_label.WriteLine(sid);
+                            for (int i = 0; i < repeat_per_sample; i++ )
+                            {
+                                sw_data.WriteLine("{0}\t{1}", sid, img_string);
+                                sw_label.WriteLine(sid);
+                            }
+
                             count_saved++;
                             sid_selected[sid]--;
-                            Console.Write("Lines processed: {0}, saved: {1}({2:P})\r", count, count_saved, (float)count_saved/total_sample_num);
+                            sid_in_this_section.AddOrUpdate(sid, 1, (existingID, existingCount) => existingCount + 1);
+                            Console.Write("Lines processed: {0}, saved: {1}({2:P}) (repeated {3} times)\r", count, count_saved, (float)count_saved/total_sample_num, repeat_per_sample);
                         }
                         catch
                         {
